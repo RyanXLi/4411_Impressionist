@@ -455,13 +455,13 @@ ImpressionistUI::ImpressionistUI() {
 
 
         // Add a stroke direction choice to the dialog
-        m_StrokeDirectionChoice = new Fl_Choice(50, 40, 150, 25, "&Stroke Direction");
+        m_StrokeDirectionChoice = new Fl_Choice(115, 40, 150, 25, "&Stroke Direction");
         m_StrokeDirectionChoice->user_data((void*)(this));	 // record self to be used by static callback functions
         m_StrokeDirectionChoice->menu(strokeDirectionMenu);
         m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
 
 
-
+        // TODO: enable / disable slider on brush change
 
 		// Add brush size slider to the dialog 
 		m_BrushSizeSlider = new Fl_Value_Slider(10, 80, 300, 20, "Size");
