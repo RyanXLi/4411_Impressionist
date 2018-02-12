@@ -22,6 +22,16 @@ enum
 };
 
 
+
+// Each stroke direction type has an associated constant.
+enum {
+    DIRECTION_SLIDER_OR_RMOUSE = 0,
+    DIRECTION_GRADIENT,
+    DIRECTION_BRUSH_DIRECTION,
+    NUM_STROKE_DIRECTION_TYPE // Make sure this stays at the end!
+};
+
+
 class ImpressionistDoc; // Pre-declaring class
 
 class Point 
