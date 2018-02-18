@@ -78,8 +78,6 @@ void ImpBrush::SetColorWithAlpha(const Point source) {
     //printf("%u, ", color[3]);
     //printf("\n");
 
-    glClear(GL_COLOR_BUFFER_BIT);
-
     glColor4ubv(color);
 
 }
