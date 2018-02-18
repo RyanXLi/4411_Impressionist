@@ -53,10 +53,39 @@ public:
 	void				show();
 	void				resize_windows(int w, int h);
 
-	// Interface to get attribute
+
+
+    // getters and setters
 
 	int					getSize();
 	void				setSize(int size);
+
+    int                 getLineWidth() {return m_lineWidth;}
+    void                setLineWidth(int lineWidth) {
+        m_lineWidth = lineWidth;
+
+        if (lineWidth >= 1 && lineWidth <= 40) {
+            m_LineWidthSlider->value(m_lineWidth);
+        }
+    }
+
+    int                 getLineAngle() { return m_lineAngle; }
+    void                setLineAngle(int lineAngle) {
+        m_lineAngle = lineAngle;
+
+        if (lineAngle >= 0 && lineAngle <= 359) {
+            m_LineAngleSlider->value(m_lineAngle);
+        }
+    }
+
+    double              getAlpha() { return m_alpha; }
+    void                setAlpha(double alpha) {
+        m_alpha = alpha;
+
+        if (alpha >= 0.0 && alpha <= 1.0) {
+            m_AlphaSlider->value(m_alpha);
+        }
+    }
 
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document

@@ -14,6 +14,7 @@
 
 // Include individual brush headers here.
 #include "PointBrush.h"
+#include "LineBrush.h"
 
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
@@ -35,8 +36,9 @@ ImpressionistDoc::ImpressionistDoc()
 	ImpBrush::c_pBrushes[BRUSH_POINTS]	= new PointBrush( this, "Points" );
 
 	// Note: You should implement these 5 brushes.  They are set the same (PointBrush) for now
+    // TODO: change to switch brush
 	ImpBrush::c_pBrushes[BRUSH_LINES]				
-		= new PointBrush( this, "Lines" );
+		= new LineBrush( this, "Lines" );
 	ImpBrush::c_pBrushes[BRUSH_CIRCLES]				
 		= new PointBrush( this, "Circles" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_POINTS]	
@@ -49,6 +51,13 @@ ImpressionistDoc::ImpressionistDoc()
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
 
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glShadeModel(GL_FLAT);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+
+    // TODO: fix alpha
 }
 
 
@@ -89,6 +98,21 @@ int ImpressionistDoc::getSize()
 {
 	return m_pUI->getSize();
 }
+
+int ImpressionistDoc::getLineWidth() {
+    return m_pUI->getLineWidth();
+}
+
+int ImpressionistDoc::getLineAngle() {
+    return m_pUI->getLineAngle();
+}
+
+double ImpressionistDoc::getAlpha() {
+    return m_pUI->getAlpha();
+}
+
+
+
 
 //---------------------------------------------------------
 // Load the specified image
