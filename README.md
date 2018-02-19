@@ -14,14 +14,12 @@ You must add the following features to the Impressionist program:
          - [ ] using the direction of the cursor movement, 
          - [ ] and using directions that are perpendicular to the gradient of the image. 
          - [ ] You can use a radio box to allow the user to select which method to use.
-- [ ] 4. Allow the user to change the opacity (alpha value) of the brush stroke. 
+- [x] 4. Allow the user to change the opacity (alpha value) of the brush stroke. 
          - [x] An alpha value slider should be added to the controls window.
 
 To see what these features should look like when they're done, you can look at the sample solution (with some of the extra credit) 
 
 . Your implementations of brush strokes, brush direction controls, etc. do not have to behave exactly the same as the sample solution, but they should be fairly close. Also, note that future updates to the sample solution will be available right here that display some of the bell and whistle implementations.
-
-
 
 TODO:
 
