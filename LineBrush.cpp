@@ -17,6 +17,8 @@ void LineBrush::BrushBegin(const Point source, const Point target) {
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
 
+    pDoc->hasDrawn = 1;
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

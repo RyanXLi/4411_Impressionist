@@ -11,6 +11,7 @@
 #include "impressionistUI.h"
 
 #include "ImpBrush.h"
+#include <math.h>
 
 // Include individual brush headers here.
 #include "PointBrush.h"
@@ -23,6 +24,7 @@
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 extern int NUM_OF_TRIANGLE = 20;
+
 
 ImpressionistDoc::ImpressionistDoc() 
 {
@@ -41,7 +43,6 @@ ImpressionistDoc::ImpressionistDoc()
 	ImpBrush::c_pBrushes[BRUSH_POINTS]	= new PointBrush( this, "Points" );
 
 	// Note: You should implement these 5 brushes.  They are set the same (PointBrush) for now
-    // TODO: change to switch brush
 	ImpBrush::c_pBrushes[BRUSH_LINES]				
 		= new LineBrush( this, "Lines" );
 	ImpBrush::c_pBrushes[BRUSH_CIRCLES]				
@@ -55,12 +56,9 @@ ImpressionistDoc::ImpressionistDoc()
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
+    m_pCurrentStrokeDirection = DIRECTION_SLIDER_OR_RMOUSE;
 
-
-
-
-
-    // TODO: fix alpha
+    hasDrawn = 0;
 }
 
 
@@ -83,7 +81,18 @@ char* ImpressionistDoc::getImageName()
 
 void ImpressionistDoc::handleRightMouseDown(Point target) {
 
-    // TODO: save framebuffer
+    if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
+
+    // cache framebuffer
+
+    framebufferCache = (GLubyte*)malloc(3 * m_screenWidth * m_screenHeight);
+    if (hasDrawn) {
+        glReadPixels(0, 0, m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+    }
+    else {
+        memset(framebufferCache, 0, 3 * m_screenWidth * m_screenHeight);
+    }
+    
 
     rightMouseStartPoint = new Point(target.x, target.y);
 
@@ -99,8 +108,13 @@ void ImpressionistDoc::handleRightMouseDown(Point target) {
 
 void ImpressionistDoc::handleRightMouseDrag(Point target) {
 
-    // TODO: clear current framebuffer
-    // TODO: restore saved framebuffer
+    if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
+
+    // clear current framebuffer
+    // restore saved framebuffer
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
 
 
     if (rightMouseCurPoint != nullptr) {
@@ -114,6 +128,8 @@ void ImpressionistDoc::handleRightMouseDrag(Point target) {
     glVertex2f(target.x, target.y);
     glEnd();
 
+    glLineWidth(1.0f);
+
     glBegin(GL_LINES);
     glVertex2f(rightMouseStartPoint->x, rightMouseStartPoint->y);
     glVertex2f(rightMouseCurPoint->x, rightMouseCurPoint->y);
@@ -123,12 +139,24 @@ void ImpressionistDoc::handleRightMouseDrag(Point target) {
 
 void ImpressionistDoc::handleRightMouseUp(Point target) {
 
-    // TODO: clear current framebuffer
-    // TODO: restore saved framebuffer
+    if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
+
+    // clear current framebuffer
+    // restore saved framebuffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
 
     rightMouseEndPoint = new Point(target.x, target.y);
 
     // TODO: calculate line angle
+    Point* upperPoint = rightMouseEndPoint->y > rightMouseStartPoint->y ? 
+        rightMouseEndPoint : rightMouseStartPoint;
+
+    Point* lowerPoint = rightMouseEndPoint->y > rightMouseStartPoint->y ?
+        rightMouseStartPoint : rightMouseEndPoint;
+
+    m_pUI->setLineAngle(
+        (int)(atan2(upperPoint->y - lowerPoint->y, upperPoint->x - lowerPoint->x) * 180 / M_PI));
 }
 
 
@@ -146,6 +174,63 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 void ImpressionistDoc::setBrushType(int type)
 {
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[type];
+
+
+
+    switch (type) {
+
+        case BRUSH_POINTS:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+
+            break;
+
+        case BRUSH_LINES:
+            m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_LineWidthSlider->activate();
+            m_pUI->m_LineAngleSlider->activate();
+            break;
+
+        case BRUSH_CIRCLES:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            break;
+
+        case BRUSH_SCATTERED_POINTS:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            break;
+
+        case BRUSH_SCATTERED_LINES:
+            m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_LineWidthSlider->activate();
+            m_pUI->m_LineAngleSlider->activate();
+            break;
+
+        case BRUSH_SCATTERED_CIRCLES:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            break;
+
+        default:
+            break;
+    }
 }
 
 void ImpressionistDoc::setStrokeDirection(int type) {

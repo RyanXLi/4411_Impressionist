@@ -20,6 +20,8 @@ void ScatteredCircleBrush::BrushBegin(const Point source, const Point target) {
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
 
+    pDoc->hasDrawn = 1;
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -50,7 +52,7 @@ void ScatteredCircleBrush::BrushMove(const Point source, const Point target) {
         Point* pSource = new Point(source.x + xVar, source.y + yVar);
         SetColorWithAlpha(*pSource);
 
-        Point* center = new Point(target.x + xVar, target.y + yVar);// TODO
+        Point* center = new Point(target.x + xVar, target.y + yVar);
 
         glBegin(GL_TRIANGLE_FAN);
         glVertex2f(center->x, center->y); // center

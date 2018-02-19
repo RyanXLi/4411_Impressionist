@@ -176,6 +176,7 @@ ImpressionistUI* ImpressionistUI::whoami(Fl_Menu_* o)
 void ImpressionistUI::cb_load_image(Fl_Menu_* o, void* v) 
 {
 	ImpressionistDoc *pDoc=whoami(o)->getDocument();
+    pDoc->hasDrawn = 0;
 
 	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName() );
 	if (newfile != NULL) {
@@ -253,7 +254,6 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	ImpressionistDoc* pDoc=pUI->getDocument();
 
 	int type=(int)v;
-
 
 	pDoc->setBrushType(type);
 
@@ -461,9 +461,8 @@ ImpressionistUI::ImpressionistUI() {
         m_StrokeDirectionChoice->user_data((void*)(this));	 // record self to be used by static callback functions
         m_StrokeDirectionChoice->menu(strokeDirectionMenu);
         m_StrokeDirectionChoice->callback(cb_strokeDirectionChoice);
+        m_StrokeDirectionChoice->deactivate();
 
-
-        // TODO: enable / disable slider on brush change
 
 		// Add brush size slider to the dialog 
 		m_BrushSizeSlider = new Fl_Value_Slider(10, 80, 300, 20, "Size");
@@ -490,6 +489,7 @@ ImpressionistUI::ImpressionistUI() {
         m_LineWidthSlider->value(m_lineWidth);
         m_LineWidthSlider->align(FL_ALIGN_RIGHT);
         m_LineWidthSlider->callback(cb_lineWidthSlides);
+        m_LineWidthSlider->deactivate();
 
         // Add line angle slider to the dialog 
         m_LineAngleSlider = new Fl_Value_Slider(10, 160, 300, 20, "Line Angle");
@@ -503,6 +503,7 @@ ImpressionistUI::ImpressionistUI() {
         m_LineAngleSlider->value(m_lineAngle);
         m_LineAngleSlider->align(FL_ALIGN_RIGHT);
         m_LineAngleSlider->callback(cb_lineAngleSlides);
+        m_LineAngleSlider->deactivate();
 
         // Add alpha slider to the dialog 
         m_AlphaSlider = new Fl_Value_Slider(10, 200, 300, 20, "Alpha");

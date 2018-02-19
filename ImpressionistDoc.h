@@ -28,16 +28,16 @@ public:
     void    setStrokeDirection(int type);
 
 	int		getSize();						// get the UI size
-	// void	setSize(int size);				// set the UI size
+    //void	setSize(int size);				// set the UI size
 
     int     getLineWidth();
-    // void    setLineWidth(int lineWidth);
+    //void    setLineWidth(int lineWidth);
 
     int     getLineAngle();
-    // void    setLineAngle(int lineAngle);
+    //void    setLineAngle(int lineAngle);
 
     double  getAlpha();
-    // void    setAlpha(double alpha);
+    //void    setAlpha(double alpha);
 
 	char*	getImageName();					// get the current image name
 	
@@ -68,6 +68,8 @@ public:
 
 	ImpressionistUI*	m_pUI;
 
+    bool hasDrawn;
+
 
 // Operations
 public:
@@ -82,8 +84,12 @@ private:
     Point* rightMouseStartPoint = nullptr;
     Point* rightMouseCurPoint = nullptr;
     Point* rightMouseEndPoint = nullptr;
+    GLubyte* framebufferCache;
+    int m_screenWidth = 600;
+    int m_screenHeight = 300; // hardcoded in ImpressionistUI.cpp
 
 };
+
 
 extern void MessageBox(char *message);
 
