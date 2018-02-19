@@ -80,6 +80,65 @@ char* ImpressionistDoc::getImageName()
 	return m_imageName;
 }
 
+
+void ImpressionistDoc::handleRightMouseDown(Point target) {
+
+    // TODO: save framebuffer
+
+    rightMouseStartPoint = new Point(target.x, target.y);
+
+    glPointSize(3.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
+
+    glBegin(GL_POINTS);
+    glVertex2f(target.x, target.y);
+    glEnd();
+
+
+}
+
+void ImpressionistDoc::handleRightMouseDrag(Point target) {
+
+    // TODO: clear current framebuffer
+    // TODO: restore saved framebuffer
+
+
+    if (rightMouseCurPoint != nullptr) {
+        delete rightMouseCurPoint;
+    }
+
+
+    rightMouseCurPoint = new Point(target.x, target.y);
+
+    glBegin(GL_POINTS);
+    glVertex2f(target.x, target.y);
+    glEnd();
+
+    glBegin(GL_LINES);
+    glVertex2f(rightMouseStartPoint->x, rightMouseStartPoint->y);
+    glVertex2f(rightMouseCurPoint->x, rightMouseCurPoint->y);
+    glEnd();
+
+}
+
+void ImpressionistDoc::handleRightMouseUp(Point target) {
+
+    // TODO: clear current framebuffer
+    // TODO: restore saved framebuffer
+
+    rightMouseEndPoint = new Point(target.x, target.y);
+
+    // TODO: calculate line angle
+}
+
+
+
+
+
+
+
+
+
 //---------------------------------------------------------
 // Called by the UI when the user changes the brush type.
 // type: one of the defined brush types.

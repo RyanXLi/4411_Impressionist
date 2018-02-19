@@ -117,13 +117,13 @@ void PaintView::draw()
 			RestoreContent();
 			break;
 		case RIGHT_MOUSE_DOWN:
-
+            m_pDoc->handleRightMouseDown(target);
 			break;
 		case RIGHT_MOUSE_DRAG:
-
+            m_pDoc->handleRightMouseDrag(target);
 			break;
 		case RIGHT_MOUSE_UP:
-
+            m_pDoc->handleRightMouseUp(target);
 			break;
 
 		default:

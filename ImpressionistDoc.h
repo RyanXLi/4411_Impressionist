@@ -41,6 +41,10 @@ public:
 
 	char*	getImageName();					// get the current image name
 	
+    void handleRightMouseDown(Point target);  // for changing line angle by dragging
+    void handleRightMouseDrag(Point target);
+    void handleRightMouseUp(Point target);
+
 
 // Attributes
 public:
@@ -64,6 +68,7 @@ public:
 
 	ImpressionistUI*	m_pUI;
 
+
 // Operations
 public:
 	// Get the color of the original picture at the specified coord
@@ -74,6 +79,9 @@ public:
 
 private:
 	char			m_imageName[256];
+    Point* rightMouseStartPoint = nullptr;
+    Point* rightMouseCurPoint = nullptr;
+    Point* rightMouseEndPoint = nullptr;
 
 };
 
