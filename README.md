@@ -6,7 +6,7 @@
 
 You must add the following features to the Impressionist program:
 
-- [ ] 1. Implement 5 different brush types: single line, scattered lines, scattered points, (filled) circles, and scattered (filled) circles. See the sample solution for an example of each brush's appearance. Note that scattered brushes should sample from each location they color individually, not just use a single color for each splotch.
+- [x] 1. Implement 5 different brush types: single line, scattered lines, scattered points, (filled) circles, and scattered (filled) circles. See the sample solution for an example of each brush's appearance. Note that scattered brushes should sample from each location they color individually, not just use a single color for each splotch.
 - [x] 2. Add sliders to control various brush attributes. You need to include sliders for the line thickness and brush angle, in addition to the existing brush size slider.
 - [ ] 3. Add the ability to control the brush direction. The stroke direction should be controlled four different ways: 
          - [x] using a slider value, 
@@ -20,6 +20,12 @@ You must add the following features to the Impressionist program:
 To see what these features should look like when they're done, you can look at the sample solution (with some of the extra credit) 
 
 . Your implementations of brush strokes, brush direction controls, etc. do not have to behave exactly the same as the sample solution, but they should be fairly close. Also, note that future updates to the sample solution will be available right here that display some of the bell and whistle implementations.
+
+
+
+TODO:
+
+- [ ] enable and disable menu items (disable and set to 0)
 
 ## Bells and Whistles
 

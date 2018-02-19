@@ -257,7 +257,7 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 
 	pDoc->setBrushType(type);
 
-    printf("cb_brushChoice called with type %d", type);
+    // printf("cb_brushChoice called with type %d", type);
 }
 
 
