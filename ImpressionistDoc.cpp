@@ -20,6 +20,7 @@
 #include "ScatteredPointBrush.h"
 #include "ScatteredLineBrush.h"
 #include "ScatteredCircleBrush.h"
+#include "FilterBrush.h"
 
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
@@ -53,6 +54,8 @@ ImpressionistDoc::ImpressionistDoc()
 		= new ScatteredLineBrush( this, "Scattered Lines" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_CIRCLES]	
 		= new ScatteredCircleBrush( this, "Scattered Circles" );
+    ImpBrush::c_pBrushes[BRUSH_FILTER]
+        = new FilterBrush(this, "Filter");
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
@@ -160,7 +163,21 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 }
 
 
+void ImpressionistDoc::autoDraw(int spacing, bool sizeRand) {
+    // use spacing to calc all required points
+    // knuth shuffle all required points
 
+    //for (int i = 0; i < numOfPoints; i++) {
+    //    
+    //    Point point = ;
+    //    if (sizeRand) {
+    //        m_pUI->setSize(..);
+    //    }
+    //    m_pCurrentBrush->BrushBegin(point);
+    //    m_pCurrentBrush->BrushEnd(point);
+    //    
+    //}
+}
 
 
 
@@ -182,50 +199,74 @@ void ImpressionistDoc::setBrushType(int type)
         case BRUSH_POINTS:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
-
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_LINES:
             m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->m_LineWidthSlider->activate();
             m_pUI->m_LineAngleSlider->activate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_CIRCLES:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_POINTS:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_LINES:
             m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->m_LineWidthSlider->activate();
             m_pUI->m_LineAngleSlider->activate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_CIRCLES:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
+            break;
+
+        case BRUSH_FILTER:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setSize(1);
+            m_pUI->m_BrushSizeSlider->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->setAlpha(0.0);
+            m_pUI->m_AlphaSlider->deactivate();
             break;
 
         default:

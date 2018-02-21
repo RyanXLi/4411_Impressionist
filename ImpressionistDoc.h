@@ -45,6 +45,8 @@ public:
     void handleRightMouseDrag(Point target);
     void handleRightMouseUp(Point target);
 
+    void autoDraw(int spacing, bool sizeRand);
+
 
 // Attributes
 public:
@@ -85,8 +87,10 @@ private:
     Point* rightMouseCurPoint = nullptr;
     Point* rightMouseEndPoint = nullptr;
     GLubyte* framebufferCache;
+
+public:
     int m_screenWidth = 600;
-    int m_screenHeight = 300; // hardcoded in ImpressionistUI.cpp
+    int m_screenHeight = 300; // TODO: getter setter
 
 };
 
