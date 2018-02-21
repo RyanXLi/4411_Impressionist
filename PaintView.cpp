@@ -147,7 +147,12 @@ int PaintView::handle(int event)
 	switch(event)
 	{
 	case FL_ENTER:
-	    redraw();
+		m_pDoc->m_pUI->m_origView->brushEntered=true;
+	    //redraw();
+		break;
+	case FL_LEAVE:
+		m_pDoc->m_pUI->m_origView->brushEntered=false;
+	    //redraw();
 		break;
 	case FL_PUSH:
 		coord.x = Fl::event_x();
@@ -160,6 +165,12 @@ int PaintView::handle(int event)
 		redraw();
 		break;
 	case FL_DRAG:
+		if(m_pDoc->m_pUI->m_origView->brushEntered){
+			m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
+			m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
+			m_pDoc->m_pUI->m_origView->redraw();
+			//redraw();
+		}
 		coord.x = Fl::event_x();
 		coord.y = Fl::event_y();
 		if (Fl::event_button()>1)
@@ -180,8 +191,12 @@ int PaintView::handle(int event)
 		redraw();
 		break;
 	case FL_MOVE:
-		coord.x = Fl::event_x();
-		coord.y = Fl::event_y();
+		if(m_pDoc->m_pUI->m_origView->brushEntered){
+			m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
+			m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
+			m_pDoc->m_pUI->m_origView->redraw();
+			//redraw();
+		}
 		break;
 	default:
 		return 0;

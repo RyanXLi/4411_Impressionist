@@ -11,7 +11,7 @@ You must add the following features to the Impressionist program:
 - [ ] 3. Add the ability to control the brush direction. The stroke direction should be controlled four different ways: 
          - [x] using a slider value, 
          - [x] using the right mouse button to drag out a direction line, 
-         - [ ] using the direction of the cursor movement, 
+         - [x] using the direction of the cursor movement, 
          - [ ] and using directions that are perpendicular to the gradient of the image. 
          - [x] You can use a radio box to allow the user to select which method to use.
 - [x] 4. Allow the user to change the opacity (alpha value) of the brush stroke. 
@@ -33,7 +33,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
 
-- [ ] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
+- [x] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
 
 - [ ] (0.5) Sometimes it is useful to use the contents of the painting window as the original image. Add a control to swap the contents of the painting window and the contents of the original image window.
 

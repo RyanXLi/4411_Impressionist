@@ -32,6 +32,9 @@ public:
 
 	ImpressionistDoc*	m_pDoc;
 
+	Point brushLocation;
+	bool brushEntered=false;
+
 private:
 	int	m_nWindowWidth, 
 		m_nWindowHeight;

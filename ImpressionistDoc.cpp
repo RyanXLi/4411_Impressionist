@@ -160,7 +160,9 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 }
 
 
+void ImpressionistDoc::handleEnterPaintview(Point source){
 
+}
 
 
 

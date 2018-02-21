@@ -44,6 +44,7 @@ public:
     void handleRightMouseDown(Point target);  // for changing line angle by dragging
     void handleRightMouseDrag(Point target);
     void handleRightMouseUp(Point target);
+    void handleEnterPaintview(Point source);
 
 
 // Attributes
