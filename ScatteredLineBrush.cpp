@@ -6,6 +6,8 @@
 #include "impressionistDoc.h"
 #include "impressionistUI.h"
 #include "ScatteredLineBrush.h"
+#include <math.h>
+#include <iostream>
 
 extern float frand();
 
@@ -25,10 +27,14 @@ void ScatteredLineBrush::BrushBegin(const Point source, const Point target) {
     
     glLineWidth(lineWidth);
 
+    firstClick=true;
+    lastCoor.x=source.x;
+    lastCoor.y=source.y;
     BrushMove(source, target);
 }
 
 void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
+	//std::cout<<lastCoor.x<<"  "<<lastCoor.y<<std::endl;
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
 
@@ -43,7 +49,26 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
     int size = pDoc->getSize();
 
     glTranslatef(target.x, target.y, 0);
-    glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);
+
+    int angle=pDoc->getLineAngle();
+    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION){
+    	if(firstClick){
+    		firstClick=false;
+    		glPopMatrix();
+    		return;
+    	}
+    	else{
+    		angle=(int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
+    		lastCoor.x=source.x;
+    		lastCoor.y=source.y;
+
+    	}
+    }
+    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT){
+
+    }
+    glRotatef(angle, 0.0, 0.0, 1.0);
+    //std::cout<<angle<<std::endl;
 
 
 

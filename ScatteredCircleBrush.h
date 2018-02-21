@@ -19,7 +19,6 @@ public:
     void BrushEnd(const Point source, const Point target);
     char* BrushName(void);
 
-
 };
 
 #endif

@@ -10,6 +10,9 @@
 #include "ImpBrush.h"
 
 class ScatteredLineBrush : public ImpBrush {
+	bool firstClick;
+	Point lastCoor;
+
 public:
     ScatteredLineBrush(ImpressionistDoc* pDoc = NULL, char* name = NULL);
 
