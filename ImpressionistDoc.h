@@ -40,11 +40,12 @@ public:
     //void    setAlpha(double alpha);
 
 	char*	getImageName();					// get the current image name
-	
+	void setImageName(char* newName);
     void handleRightMouseDown(Point target);  // for changing line angle by dragging
     void handleRightMouseDrag(Point target);
     void handleRightMouseUp(Point target);
-    void handleEnterPaintview(Point source);
+
+
 
 
 // Attributes
@@ -58,6 +59,11 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
+
+	//Bitmaps for blurred image and edge image
+	unsigned char*	m_ucBlurimage;
+	unsigned char*	m_ucEdgeimage;
+
 
 
 	// The current active brush.
@@ -78,6 +84,8 @@ public:
 	GLubyte* GetOriginalPixel( int x, int y );   
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
+
+	int GetOriginalGreyscale( int x, int y );
 
 
 private:

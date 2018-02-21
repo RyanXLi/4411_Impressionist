@@ -10,6 +10,8 @@
 #include "ImpBrush.h"
 
 class LineBrush : public ImpBrush {
+	bool firstClick;
+	Point lastCoor;
 public:
     LineBrush(ImpressionistDoc* pDoc = NULL, char* name = NULL);
 

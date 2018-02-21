@@ -20,7 +20,8 @@
 #include "ScatteredPointBrush.h"
 #include "ScatteredLineBrush.h"
 #include "ScatteredCircleBrush.h"
-
+#include <vector>
+#include <algorithm>
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 extern int NUM_OF_TRIANGLE = 20;
@@ -34,7 +35,8 @@ ImpressionistDoc::ImpressionistDoc()
 	m_nWidth		= -1;
 	m_ucBitmap		= NULL;
 	m_ucPainting	= NULL;
-
+	m_ucBlurimage	= NULL;
+	m_ucEdgeimage	= NULL;
 
 	// create one instance of each brush
 	ImpBrush::c_nBrushCount	= NUM_BRUSH_TYPE;
@@ -160,14 +162,6 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 }
 
 
-void ImpressionistDoc::handleEnterPaintview(Point source){
-
-}
-
-
-
-
-
 
 //---------------------------------------------------------
 // Called by the UI when the user changes the brush type.
@@ -260,8 +254,20 @@ double ImpressionistDoc::getAlpha() {
     return m_pUI->getAlpha();
 }
 
+int entry(int row,int col,int width){
+	return row*width+col;
+}
 
-
+int Medium(int row, int col, int width, unsigned char* matrix){
+	std::vector<int> v;
+	for (int i=-1;i<2;i++){
+		for (int j=-1;j<2;j++){
+			v.push_back(matrix[entry(row+i,col+j,width)]);
+		}
+	}
+	sort(v.begin(),v.end());
+	return v[5];
+}
 
 //---------------------------------------------------------
 // Load the specified image
@@ -291,6 +297,7 @@ int ImpressionistDoc::loadImage(char *iname)
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
 
+
 	m_ucBitmap		= data;
 
 	// allocate space for draw view
@@ -310,7 +317,71 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_pUI->m_paintView->resizeWindow(width, height);	
 	m_pUI->m_paintView->refresh();
 
+	if ( m_ucBlurimage ) delete [] m_ucBlurimage;
+	if ( m_ucEdgeimage ) delete [] m_ucEdgeimage;
+	//start computing the blurred image and edge image:
+	//1. compute grey image
+	//2. construct margins for grey image
+	//3. compute blurred image
+	//4. compute edge image
 
+	//1
+	unsigned char* Greyimage=new unsigned char[height*width];
+	for (int i = 0; i < height*width; i++){
+		int scale = round(0.299*data[3*i]+0.587*data[3*i+1]+0.144*data[3*i+2]);
+		Greyimage[i]=scale;
+	}
+
+	//2
+	unsigned char* GreyimageWithMargins=new unsigned char[(height+2)*(width+2)];
+	GreyimageWithMargins[0]=Greyimage[0];
+	GreyimageWithMargins[width+1]=Greyimage[width-1];
+	GreyimageWithMargins[(height+2)*(width+2)-1]=Greyimage[height*width-1];
+	GreyimageWithMargins[(height+1)*(width+2)]=Greyimage[(height-1)*width];
+	for (int row=0;row<height+2;row++){
+		for (int col=0;col<width+2;col++){
+			if (row==0 && col==0){
+				GreyimageWithMargins[0]=Greyimage[0];
+			}
+			else if(row==0 && col==width+1){
+				GreyimageWithMargins[width+1]=Greyimage[width-1];
+			}
+			else if(row==height+1 && col==0){
+				GreyimageWithMargins[(height+1)*(width+2)]=Greyimage[(height-1)*width];
+			}
+			else if(row==height+1 && col==width+1){
+				GreyimageWithMargins[(height+2)*(width+2)-1]=Greyimage[height*width-1];
+			}
+			else if (row==0){
+				GreyimageWithMargins[row*(width+2)+col]=Greyimage[col-1];
+			}
+			else if (col==0){
+				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width];
+			}
+			else if(row==height+1){
+				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width+col-1];
+			}
+			else if(col==width+1){
+				GreyimageWithMargins[row*(width+2)+col]=Greyimage[row*width];
+			}
+			else{
+				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width+col-1];
+			}
+		}
+	}
+	//3
+	m_ucBlurimage=new unsigned char[height*width];
+	for (int row=1;row<height+1;row++){
+		for (int col=1;col<width+1;col++){
+			m_ucBlurimage[(row-1)*width+col-1]=Medium(row,col,width, GreyimageWithMargins);
+		}
+	}
+
+	//4
+	// To do: compute edge image with threshold
+
+	delete GreyimageWithMargins;
+	delete Greyimage;
 	return 1;
 }
 
@@ -378,3 +449,20 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 	return GetOriginalPixel( p.x, p.y );
 }
 
+int ImpressionistDoc::GetOriginalGreyscale( int x, int y ){
+	if ( x < 0 )
+		x = 0;
+	else if ( x >= m_nWidth )
+		x = m_nWidth-1;
+
+	if ( y < 0 )
+		y = 0;
+	else if ( y >= m_nHeight )
+		y = m_nHeight-1;
+
+	return m_ucBlurimage[y*m_nWidth + x];
+}
+
+void ImpressionistDoc::setImageName(char* newName){
+	strcpy(m_imageName, newName);
+}

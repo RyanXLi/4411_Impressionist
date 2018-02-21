@@ -82,7 +82,7 @@ void OriginalView::draw()
 
 			glBegin( GL_POINTS );
 				glVertex2d( brushLocation.x+scrollpos.x,
-						+startrow + drawHeight - brushLocation.y );
+						m_nWindowHeight - brushLocation.y );
 			glEnd();
 		}
 

@@ -181,6 +181,7 @@ void ImpressionistUI::cb_load_image(Fl_Menu_* o, void* v)
 	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName() );
 	if (newfile != NULL) {
 		pDoc->loadImage(newfile);
+		pDoc->setImageName(newfile);
 	}
 }
 
