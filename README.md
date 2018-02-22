@@ -8,11 +8,11 @@ You must add the following features to the Impressionist program:
 
 - [x] 1. Implement 5 different brush types: single line, scattered lines, scattered points, (filled) circles, and scattered (filled) circles. See the sample solution for an example of each brush's appearance. Note that scattered brushes should sample from each location they color individually, not just use a single color for each splotch.
 - [x] 2. Add sliders to control various brush attributes. You need to include sliders for the line thickness and brush angle, in addition to the existing brush size slider.
-- [ ] 3. Add the ability to control the brush direction. The stroke direction should be controlled four different ways: 
+- [x] 3. Add the ability to control the brush direction. The stroke direction should be controlled four different ways: 
          - [x] using a slider value, 
          - [x] using the right mouse button to drag out a direction line, 
-         - [ ] using the direction of the cursor movement, 
-         - [ ] and using directions that are perpendicular to the gradient of the image. 
+         - [x] using the direction of the cursor movement, 
+         - [x] and using directions that are perpendicular to the gradient of the image. 
          - [x] You can use a radio box to allow the user to select which method to use.
 - [x] 4. Allow the user to change the opacity (alpha value) of the brush stroke. 
          - [x] An alpha value slider should be added to the controls window.
@@ -33,7 +33,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
 
-- [ ] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
+- [x] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
 
 - [ ] (0.5) Sometimes it is useful to use the contents of the painting window as the original image. Add a control to swap the contents of the painting window and the contents of the original image window.
 
@@ -51,7 +51,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (1.5) To make your painting more interesting, add "alpha-mapped" brush strokes. In other words, allow the user to load a bitmap representing a brush stroke. This bitmap would contain an alpha value at each position. Then when this brush is used to draw, a single color would be selected from the image, all pixels in the brush bitmap would be set to this RGB color (without changing the alpha value), and this partially transparent bitmap would be painted on the canvas. A new color would be used each time the brush is drawn.
 
-- [ ] (1.5) It can be time-consuming to paint an image manually. Add a feature so that a whole painting can be created *automatically*. The user should only have to specify a brush type, size, and angle to use. Then the program should automatically paint brush strokes over the entire image, using a randomized brush order and varying the brush attributes slightly as it goes (to increase realism).
+- [x] (1.5) It can be time-consuming to paint an image manually. Add a feature so that a whole painting can be created *automatically*. The user should only have to specify a brush type, size, and angle to use. Then the program should automatically paint brush strokes over the entire image, using a randomized brush order and varying the brush attributes slightly as it goes (to increase realism).
 
 - [ ] (1.5) At times, you may want the brush strokes to follow the gradient of a *different* image than the base image. Add a button(s) that will cause the direction of brush strokes to be automatically determined from a user specified image.
 

@@ -7,6 +7,7 @@
 #include "impressionistUI.h"
 #include "LineBrush.h"
 #include <math.h>
+#include <vector>
 
 extern float frand();
 
@@ -50,6 +51,10 @@ void LineBrush::BrushMove(const Point source, const Point target) {
 
     glTranslatef(target.x, target.y, 0);
 
+
+
+
+
     if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION) {
         if (firstClick) {
             firstClick = false;
@@ -62,8 +67,45 @@ void LineBrush::BrushMove(const Point source, const Point target) {
         }
     }
     else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT) {
+        // apply matrix: gaussianBlur
+        std::vector<std::vector<int>> gaussianBlur = { 
+            {1, 2, 1}, 
+            {2, 4, 2}, 
+            {1, 2, 1} 
+        };
+        std::vector<std::vector<int>> blurred = { 
+            { pDoc->applyMatrix({ source.x - 1, source.y + 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x,     source.y + 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y + 1 }, gaussianBlur, 3, TRUE) },
 
+            { pDoc->applyMatrix({ source.x - 1, source.y}, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix(source                   , gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y}, gaussianBlur, 3, TRUE) },
+
+            { pDoc->applyMatrix({ source.x - 1, source.y - 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x    , source.y - 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y - 1 }, gaussianBlur, 3, TRUE) }
+        };
+        // apply matrix: sobelX, sobelY
+        std::vector<std::vector<int>> sobelX = {
+            { 1, 0, -1 },
+            { 2, 0, -2 },
+            { 1, 0, -1 }
+        };
+        std::vector<std::vector<int>> sobelY = {
+            { 1, 2, 1 },
+            { 0, 0, 0 },
+            { -1, -2, -1 }
+        };
+
+
+        int sobelXresult = pDoc->applyMatrixToMatrix(blurred, sobelX, 3, FALSE);
+        int sobelYresult = pDoc->applyMatrixToMatrix(blurred, sobelY, 3, FALSE);
+        
+
+        pDoc->m_pUI->setLineAngle(atan2(sobelYresult, sobelXresult) * 180 / M_PI + 90);
     }
+
 
     glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);
 

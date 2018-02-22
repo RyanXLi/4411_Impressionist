@@ -165,47 +165,141 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 }
 
 
-void ImpressionistDoc::autoDraw(int spacing, bool sizeRand, bool orderRand) {
-    // 1 <= spacing <= 16, half inclusive
+//void ImpressionistDoc::autoDraw(int spacing, bool sizeRand, bool orderRand) {
+//    // 1 <= spacing <= 16, half inclusive
+//
+//    std::random_device device;
+//    std::mt19937 mt(device());
+//    
+//    // use spacing to calc all required points
+//    // knuth shuffle all required points
+//
+//    int numRequiredPoints = (m_screenWidth / spacing + 1) * (m_screenHeight / spacing + 1);
+//    int numPointsOnCol = (m_screenHeight / spacing + 1);
+//    //int* points = new int[numRequiredPoints];
+//    //for (int i = 0; i < numRequiredPoints; i++) {
+//    //    points[i] = spacing * i;
+//    //}
+//    //
+//    //if (orderRand) { knuthShuffle(points, numRequiredPoints); }
+//
+//    for (int i = 0; i < numRequiredPoints; i++) {
+//        
+//        //Point* point = new Point(1 + points[i] / (m_screenWidth / spacing + 1) * 2,
+//        //    1 + points[i] % (m_screenWidth / spacing + 1));
+//
+//        
+//        Point* point = new Point(i / numPointsOnCol * spacing, i % numPointsOnCol * spacing);
+//
+//        if (sizeRand) {
+//            std::uniform_int_distribution<> dis(max(1, getSize() - 2), getSize() + 2);
+//            int randomSize = dis(mt);
+//            m_pUI->setSize(randomSize);
+//        }
+//
+//        printf("Painting point (%d, %d).\n", point->x, point->y);
+//
+//        // possible problem
+//        m_pCurrentBrush->BrushBegin(*point, *point);
+//
+//        m_pUI->m_paintView->SaveCurrentContent();
+//        m_pUI->m_paintView->RestoreContent();
+//        
+//    }
+//}
 
-    std::random_device device;
-    std::mt19937 mt(device());
-    
-    // use spacing to calc all required points
-    // knuth shuffle all required points
 
-    int numRequiredPoints = (m_screenWidth / spacing + 1) * (m_screenHeight / spacing + 1);
-    int numPointsOnCol = (m_screenHeight / spacing + 1);
-    //int* points = new int[numRequiredPoints];
-    //for (int i = 0; i < numRequiredPoints; i++) {
-    //    points[i] = spacing * i;
-    //}
-    //
-    //if (orderRand) { knuthShuffle(points, numRequiredPoints); }
+int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+    // suppose input valid
+    int weightSum = 0;
 
-    for (int i = 0; i < numRequiredPoints; i++) {
-        
-        //Point* point = new Point(1 + points[i] / (m_screenWidth / spacing + 1) * 2,
-        //    1 + points[i] % (m_screenWidth / spacing + 1));
-
-        
-        Point* point = new Point(i / numPointsOnCol * spacing, i % numPointsOnCol * spacing);
-
-        if (sizeRand) {
-            std::uniform_int_distribution<> dis(max(1, getSize() - 2), getSize() + 2);
-            int randomSize = dis(mt);
-            m_pUI->setSize(randomSize);
+    if (useWeightSum) {
+        for (int i = 0; i < matrixDim; i++) {
+            for (int j = 0; j < matrixDim; j++) {
+                weightSum += matrix[i][j];
+            }
         }
-
-        printf("Painting point (%d, %d).\n", point->x, point->y);
-
-        // possible problem
-        m_pCurrentBrush->BrushBegin(*point, *point);
-
-        m_pUI->m_paintView->SaveCurrentContent();
-        m_pUI->m_paintView->RestoreContent();
-        
     }
+
+    GLuint pxColor = 0;
+    GLuint finalColor = 0;
+
+    for (int i = 0; i < matrixDim; i++) {
+        for (int j = 0; j < matrixDim; j++) {
+            int y = source.y + i - (matrixDim - 1) / 2;
+            int x = source.x + j - (matrixDim - 1) / 2;
+
+            if (x < 0 && y < 0) {
+                pxColor = intensity(Point(0, 0));
+            }
+            else if (x < 0 && y >= m_screenHeight) {
+                pxColor = intensity(Point(0, m_screenHeight - 1));
+            }
+            else if (x >= m_screenWidth && y < 0) {
+                pxColor = intensity(Point(m_screenWidth - 1, 0));
+            }
+            else if (x >= m_screenWidth && y >= m_screenHeight) {
+                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1));
+            }
+            else if (x < 0) {
+                pxColor = intensity(Point(0, y));
+            }
+            else if (x >= m_screenWidth) {
+                pxColor = intensity(Point(m_screenWidth - 1, y));
+            }
+            else if (y < 0) {
+                pxColor = intensity(Point(x, 0));
+            }
+            else if (y >= m_screenHeight) {
+                pxColor = intensity(Point(x, m_screenHeight - 1));
+            }
+            else {
+                pxColor = intensity(Point(x, y));
+            }
+
+            finalColor += pxColor * matrix[i][j];
+        }
+    }
+
+    if (useWeightSum) finalColor /= weightSum;
+
+    return finalColor;
+}
+
+
+int ImpressionistDoc::applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+    // suppose input valid
+    // assume `originalMatrix` and `matrix` both have dimension `matrixDim`
+
+
+    int weightSum = 0;
+
+    if (useWeightSum) {
+        for (int i = 0; i < matrixDim; i++) {
+            for (int j = 0; j < matrixDim; j++) {
+                weightSum += matrix[i][j];
+            }
+        }
+    }
+
+    GLuint pxColor = 0;
+    GLuint finalColor = 0;
+
+    for (int i = 0; i < matrixDim; i++) {
+        for (int j = 0; j < matrixDim; j++) {
+            int y = i;
+            int x = j;
+
+
+            
+
+            finalColor += originalMatrix[x][y] * matrix[i][j];
+        }
+    }
+    
+    if (useWeightSum) finalColor /= weightSum;
+
+    return finalColor;
 }
 
 

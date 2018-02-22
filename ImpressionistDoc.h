@@ -9,6 +9,7 @@
 
 #include "impressionist.h"
 #include "bitmap.h"
+#include <vector>
 
 class ImpressionistUI;
 
@@ -45,7 +46,17 @@ public:
     void handleRightMouseDrag(Point target);
     void handleRightMouseUp(Point target);
 
-    void autoDraw(int spacing, bool sizeRand, bool orderRand);
+    //void autoDraw(int spacing, bool sizeRand, bool orderRand);
+
+    int applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
+    int applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
+
+    GLuint intensity(Point point) {
+        GLubyte red = (GetOriginalPixel(point))[0];
+        GLubyte green = (GetOriginalPixel(point))[1];
+        GLubyte blue = (GetOriginalPixel(point))[2];
+        return 0.299 * red + 0.587 * green + 0.114 * blue;
+    }
 
 
 
