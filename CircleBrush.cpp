@@ -42,6 +42,14 @@ void CircleBrush::BrushMove(const Point source, const Point target) {
 
     int size = pDoc->getSize();
 
+    if (size == 1) {
+        glPointSize(1);
+        glBegin(GL_POINTS);
+        glVertex2f(target.x, target.y);
+        glEnd();
+        return;
+    }
+
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(target.x, target.y); // center
     for (int i = 0; i <= NUM_OF_TRIANGLE; i++) {

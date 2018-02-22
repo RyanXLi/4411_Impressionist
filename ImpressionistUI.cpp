@@ -293,8 +293,6 @@ void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 }
 
 
-
-
 void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v) 
 {
     ((ImpressionistUI*)(o->user_data()))->m_lineWidth = int(((Fl_Slider *)o)->value());
@@ -498,7 +496,7 @@ ImpressionistUI::ImpressionistUI() {
     m_lineWidth = 1;
     m_lineAngle = 0;
     m_alpha = 1.00;
-    m_spacing = 1;
+    m_spacing = 4;
     m_sizeRand = FALSE;
 
 	// brush dialog definition

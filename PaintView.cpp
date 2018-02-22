@@ -106,28 +106,6 @@ void PaintView::draw()
         SaveCurrentContent();
         RestoreContent();
         autoDrawAsked = 0;
-        draw();
-
-        //m_pDoc->m_pCurrentBrush->BrushBegin({ xToDraw, yToDraw }, { xToDraw, yToDraw });
-        //glFlush();
-        //
-        //SaveCurrentContent();
-        //RestoreContent();
-        //
-        //if (xToDraw < m_pDoc->m_screenWidth) {
-        //    xToDraw += spacing;
-        //    draw();
-        //}
-        //else if (yToDraw < m_pDoc->m_screenHeight) {
-        //    xToDraw = 0;
-        //    yToDraw += spacing;
-        //    draw();
-        //}
-        //else {
-        //    autoDrawAsked = 0;
-        //    xToDraw = 0;
-        //    yToDraw = 0;
-        //}
     }
 
     
