@@ -32,6 +32,9 @@ public:
 
 	ImpressionistDoc*	m_pDoc;
 
+    Point brushLocation;
+    bool needToDrawDot = FALSE;
+
 private:
 	int	m_nWindowWidth, 
 		m_nWindowHeight;

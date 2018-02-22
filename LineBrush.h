@@ -18,7 +18,9 @@ public:
     void BrushEnd(const Point source, const Point target);
     char* BrushName(void);
 
-
+private:
+    bool firstClick = FALSE;
+    Point lastCoor = { 0, 0 };
 };
 
 #endif

@@ -6,6 +6,8 @@
 #include "impressionistDoc.h"
 #include "impressionistUI.h"
 #include "ScatteredLineBrush.h"
+#include <math.h>
+
 
 extern float frand();
 
@@ -25,6 +27,10 @@ void ScatteredLineBrush::BrushBegin(const Point source, const Point target) {
     
     glLineWidth(lineWidth);
 
+    firstClick = true;
+    lastCoor.x = source.x;
+    lastCoor.y = source.y;
+
     BrushMove(source, target);
 }
 
@@ -43,9 +49,23 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
     int size = pDoc->getSize();
 
     glTranslatef(target.x, target.y, 0);
+
+    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION) {
+        if (firstClick) {
+            firstClick = false;  
+        }
+        else {
+            int angle = (int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
+            pDoc->m_pUI->setLineAngle(angle);
+            lastCoor.x = source.x;
+            lastCoor.y = source.y;
+        }
+    }
+    else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT) {
+
+    }
+
     glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);
-
-
 
     glBegin(GL_LINES);
 
@@ -54,8 +74,6 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
     for (int i = 0; i < numLinesPerBlock; i++) {
         double x = (frand() - 0.5) * size;
         double y = (frand() - 0.5) * size;
-
-        // TODO: out of bound
 
         SetColorWithAlpha({source.x + (int)x, source.y + (int)y});
 

@@ -171,6 +171,11 @@ void PaintView::draw()
 
 int PaintView::handle(int event)
 {
+    // ADDED
+    int sourceX = 0;
+    int sourceY = 0;
+    // ADDED END
+
 	switch(event)
 	{
 	case FL_ENTER:
@@ -189,6 +194,19 @@ int PaintView::handle(int event)
 	case FL_DRAG:
 		coord.x = Fl::event_x();
 		coord.y = Fl::event_y();
+
+        // ADDED
+        sourceX = coord.x + m_nStartCol;
+        sourceY = m_nEndRow - coord.y;
+        if (sourceX >= 0 && sourceX < m_pDoc->m_screenWidth 
+            && sourceY >= 0 && sourceY < m_pDoc->m_screenWidth) {
+            m_pDoc->m_pUI->m_origView->needToDrawDot = TRUE;
+            m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
+            m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
+            m_pDoc->m_pUI->m_origView->redraw();
+        }
+        // ADDED END
+
 		if (Fl::event_button()>1)
 			eventToDo=RIGHT_MOUSE_DRAG;
 		else
@@ -209,6 +227,19 @@ int PaintView::handle(int event)
 	case FL_MOVE:
 		coord.x = Fl::event_x();
 		coord.y = Fl::event_y();
+
+        // ADDED
+        sourceX = coord.x + m_nStartCol;
+        sourceY = m_nEndRow - coord.y;
+        if (sourceX >= 0 && sourceX < m_pDoc->m_screenWidth
+            && sourceY >= 0 && sourceY < m_pDoc->m_screenWidth) {
+            m_pDoc->m_pUI->m_origView->needToDrawDot = TRUE;
+            m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
+            m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
+            m_pDoc->m_pUI->m_origView->redraw();
+        }
+        // ADDED END
+
 		break;
 	default:
 		return 0;

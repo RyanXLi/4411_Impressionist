@@ -75,6 +75,20 @@ void OriginalView::draw()
 		glDrawBuffer( GL_BACK );
 		glDrawPixels( drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, bitstart );
 
+        if (needToDrawDot) {
+        
+            glPointSize(5.0);
+            GLubyte color[4] = { 255,0,0,255 };
+            glColor4ubv(color);
+            
+            glBegin(GL_POINTS);
+                glVertex2d(brushLocation.x + scrollpos.x,
+               startrow + drawHeight - brushLocation.y);
+            glEnd();
+            
+        }
+
+
 	}
 			
 	glFlush();
