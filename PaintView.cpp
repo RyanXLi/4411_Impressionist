@@ -10,7 +10,9 @@
 #include "paintview.h"
 #include "ImpBrush.h"
 
-#include <Windows.h>
+#include <math.h>
+#include <random>
+#include <algorithm>
 
 
 #define LEFT_MOUSE_DOWN		1
@@ -20,6 +22,7 @@
 #define RIGHT_MOUSE_DRAG	5
 #define RIGHT_MOUSE_UP		6
 
+extern float frand();
 
 #ifndef WIN32
 #define min(a, b)	( ( (a)<(b) ) ? (a) : (b) )
@@ -90,25 +93,9 @@ void PaintView::draw()
 
 
     if (autoDrawAsked) {
-
-        // auto drawing
-
-        int spacing = m_pDoc->m_pUI->getSpacing();
-
-        for (int i = 0; i <= m_pDoc->m_screenWidth; i+=spacing) {
-            for (int j = 0; j <= m_pDoc->m_screenHeight; j+=spacing) {
-                m_pDoc->m_pCurrentBrush->BrushBegin({ i, j }, { i, j });
-                
-            }
-            glFlush();
-        }
-        
-        SaveCurrentContent();
-        RestoreContent();
+        autoDraw(m_pDoc->m_pUI->getSpacing(), m_pDoc->m_pUI->getSizeRand(), TRUE);
         autoDrawAsked = 0;
     }
-
-    
 
 
 	if ( m_pDoc->m_ucPainting && !isAnEvent) 
@@ -297,4 +284,98 @@ void PaintView::RestoreContent()
 				  m_pPaintBitstart);
 
 //	glDrawBuffer(GL_FRONT);
+}
+
+void PaintView::autoDraw(int spacing, bool sizeRand, bool orderRand) {
+    // auto drawing
+    //printf("drawH: %d\n", m_nDrawHeight);
+    //printf("windH: %d\n", m_nWindowHeight);
+    //printf("paintH: %d\n", m_pDoc->m_nPaintHeight);
+    //printf("\n");
+
+    int originalSize = m_pDoc->getSize();
+    int sizeVar = 5;
+    int numRequiredPoints = (m_pDoc->m_screenWidth / spacing + 1) * (m_pDoc->m_screenHeight / spacing + 1);  
+    int* coords;
+
+    if (orderRand) {
+
+        coords = new int[numRequiredPoints];
+        int t = 0; //indices
+
+        int iMax = m_pDoc->m_screenWidth;
+        int jMax = m_pDoc->m_screenHeight + (m_nWindowHeight - m_pDoc->m_nPaintHeight);
+
+        for (int i = 0; i <= iMax; i += spacing) {
+            for (int j = m_nWindowHeight - m_pDoc->m_nPaintHeight; j <= jMax; j += spacing) {
+                coords[t] = i * (jMax + 1) + j;
+                t++;
+            }
+        }
+        knuthShuffle(coords, numRequiredPoints);
+
+
+        for (t = 0; t < numRequiredPoints; t++) {
+            int i = coords[t] / (jMax + 1);
+            int j = coords[t] % (jMax + 1);
+
+            //printf("i: %d\n", i);
+            //printf("j: %d\n", j);
+            if (sizeRand) {
+                int newSize = originalSize + (frand() - 0.5) * sizeVar;
+                while (newSize < 1) {
+                    newSize = originalSize + (frand() - 0.5) * sizeVar;
+                }
+                m_pDoc->m_pUI->setSize(newSize);
+            }
+            int realY = j - (m_nWindowHeight - m_pDoc->m_nPaintHeight);
+            m_pDoc->m_pCurrentBrush->BrushBegin({ i, realY }, { i, j });
+
+            if (t % (m_pDoc->m_screenWidth / spacing + 1) == 0) {
+                glFlush();
+            }
+        }
+    }
+    else {
+        // normal order
+        for (int i = 0; i <= m_pDoc->m_screenWidth; i += spacing) {
+            for (int j = m_nWindowHeight - m_pDoc->m_nPaintHeight; j <= m_pDoc->m_screenHeight + (m_nWindowHeight - m_pDoc->m_nPaintHeight); j += spacing) {
+                //printf("i: %d\n", i);
+                //printf("j: %d\n", j);
+                if (sizeRand) {
+                    int newSize = originalSize + (frand() - 0.5) * sizeVar;
+                    while (newSize < 1) {
+                        newSize = originalSize + (frand() - 0.5) * sizeVar;
+                    }
+                    m_pDoc->m_pUI->setSize(newSize);
+                }
+                int realY = j - (m_nWindowHeight - m_pDoc->m_nPaintHeight);
+                m_pDoc->m_pCurrentBrush->BrushBegin({ i, realY }, { i, j });
+        
+            }
+            glFlush();
+        }
+    }
+
+    m_pDoc->m_pUI->setSize(originalSize);
+
+    SaveCurrentContent();
+    RestoreContent();
+}
+
+
+
+void PaintView::knuthShuffle(int* array, int len) {
+
+    std::random_device device;
+    std::mt19937 mt(device());
+
+    for (int i = len - 1; i >= 0; i--) {
+        std::uniform_int_distribution<> dis(0, i);
+        int rand = dis(mt);
+        if (array[rand] != array[i]) {
+            std::swap(array[rand], array[i]);
+        }
+    }
+
 }

@@ -47,8 +47,7 @@ public:
 
     void autoDraw(int spacing, bool sizeRand, bool orderRand);
 
-private:
-    void knuthShuffle(int* array, int len);
+
 
 
 // Attributes

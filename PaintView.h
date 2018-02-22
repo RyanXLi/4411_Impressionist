@@ -30,6 +30,13 @@ public:
 
 	void RestoreContent();
 
+    void autoDraw(int spacing, bool sizeRand, bool orderRand);
+
+private:
+    void knuthShuffle(int* array, int len);
+
+public:
+
 	ImpressionistDoc *m_pDoc;
 
     bool autoDrawAsked = 0;

@@ -209,24 +209,6 @@ void ImpressionistDoc::autoDraw(int spacing, bool sizeRand, bool orderRand) {
 }
 
 
-void ImpressionistDoc::knuthShuffle(int* array, int len) {
-
-    std::random_device device;
-    std::mt19937 mt(device());
-
-    for (int i = len - 1; i >= 0; i--) {
-        std::uniform_int_distribution<> dis(0, i);
-        int rand = dis(mt);
-        if (array[rand] != array[i]) {
-            std::swap(array[rand], array[i]);
-        }
-    }
-
-}
-
-
-
-
 
 
 //---------------------------------------------------------
