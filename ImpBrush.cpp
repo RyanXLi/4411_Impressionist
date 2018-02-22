@@ -72,11 +72,14 @@ void ImpBrush::SetColorWithAlpha(const Point source) {
     GLubyte alpha = pDoc->getAlpha() * glubyteMax;
     color[3] = alpha;
 
+    //printf("\n");
     //printf("%u, ", color[0]);
     //printf("%u, ", color[1]);
     //printf("%u, ", color[2]);
     //printf("%u, ", color[3]);
     //printf("\n");
+    //printf("\n");
+
 
     glColor4ubv(color);
 

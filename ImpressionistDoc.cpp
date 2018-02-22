@@ -12,6 +12,8 @@
 
 #include "ImpBrush.h"
 #include <math.h>
+#include <random>
+#include <algorithm>
 
 // Include individual brush headers here.
 #include "PointBrush.h"
@@ -163,20 +165,63 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 }
 
 
-void ImpressionistDoc::autoDraw(int spacing, bool sizeRand) {
+void ImpressionistDoc::autoDraw(int spacing, bool sizeRand, bool orderRand) {
+    // 1 <= spacing <= 16, half inclusive
+
+    std::random_device device;
+    std::mt19937 mt(device());
+    
     // use spacing to calc all required points
     // knuth shuffle all required points
 
-    //for (int i = 0; i < numOfPoints; i++) {
-    //    
-    //    Point point = ;
-    //    if (sizeRand) {
-    //        m_pUI->setSize(..);
-    //    }
-    //    m_pCurrentBrush->BrushBegin(point);
-    //    m_pCurrentBrush->BrushEnd(point);
-    //    
+    int numRequiredPoints = (m_screenWidth / spacing + 1) * (m_screenHeight / spacing + 1);
+    int numPointsOnCol = (m_screenHeight / spacing + 1);
+    //int* points = new int[numRequiredPoints];
+    //for (int i = 0; i < numRequiredPoints; i++) {
+    //    points[i] = spacing * i;
     //}
+    //
+    //if (orderRand) { knuthShuffle(points, numRequiredPoints); }
+
+    for (int i = 0; i < numRequiredPoints; i++) {
+        
+        //Point* point = new Point(1 + points[i] / (m_screenWidth / spacing + 1) * 2,
+        //    1 + points[i] % (m_screenWidth / spacing + 1));
+
+        
+        Point* point = new Point(i / numPointsOnCol * spacing, i % numPointsOnCol * spacing);
+
+        if (sizeRand) {
+            std::uniform_int_distribution<> dis(max(1, getSize() - 2), getSize() + 2);
+            int randomSize = dis(mt);
+            m_pUI->setSize(randomSize);
+        }
+
+        printf("Painting point (%d, %d).\n", point->x, point->y);
+
+        // possible problem
+        m_pCurrentBrush->BrushBegin(*point, *point);
+
+        m_pUI->m_paintView->SaveCurrentContent();
+        m_pUI->m_paintView->RestoreContent();
+        
+    }
+}
+
+
+void ImpressionistDoc::knuthShuffle(int* array, int len) {
+
+    std::random_device device;
+    std::mt19937 mt(device());
+
+    for (int i = len - 1; i >= 0; i--) {
+        std::uniform_int_distribution<> dis(0, i);
+        int rand = dis(mt);
+        if (array[rand] != array[i]) {
+            std::swap(array[rand], array[i]);
+        }
+    }
+
 }
 
 

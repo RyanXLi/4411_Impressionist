@@ -32,6 +32,11 @@ public:
 
 	ImpressionistDoc *m_pDoc;
 
+    bool autoDrawAsked = 0;
+
+    int xToDraw = 0;
+    int yToDraw = 0;
+
 private:
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,
@@ -42,6 +47,7 @@ private:
 			m_nEndCol,
 			m_nWindowWidth, 
 			m_nWindowHeight;
+
 
 };
 

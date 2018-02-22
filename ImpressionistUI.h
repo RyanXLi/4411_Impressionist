@@ -42,6 +42,8 @@ public:
     Fl_Slider*          m_LineWidthSlider;
     Fl_Slider*          m_LineAngleSlider;
     Fl_Slider*          m_AlphaSlider;
+    Fl_Slider*          m_SpacingSlider;
+    Fl_Light_Button*    sizeRandLightButton;
 
 
 	Fl_Button*          m_ClearCanvasButton;
@@ -62,6 +64,7 @@ public:
 
     int                 getLineWidth() {return m_lineWidth;}
     void                setLineWidth(int lineWidth) {
+        
         m_lineWidth = lineWidth;
 
         if (lineWidth >= 1 && lineWidth <= 40) {
@@ -87,6 +90,11 @@ public:
         }
     }
 
+    int                 getSpacing();
+    void                setSpacing(int spacing);
+    bool                getSizeRand();
+    void                setSizeRand(bool sizeRand);
+
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -95,6 +103,8 @@ private:
     int     m_lineWidth;
     int     m_lineAngle;
     double  m_alpha;
+    int     m_spacing;
+    bool    m_sizeRand;
 
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
@@ -119,6 +129,9 @@ private:
     static void	cb_lineWidthSlides(Fl_Widget* o, void* v);
     static void	cb_lineAngleSlides(Fl_Widget* o, void* v);
     static void	cb_alphaSlides(Fl_Widget* o, void* v);
+    static void	cb_spacingSlides(Fl_Widget* o, void* v);
+    static void cb_sizeRandLightButton(Fl_Widget* o, void* v);
+    static void cb_autoDrawButton(Fl_Widget* o, void* v);
 
 };
 

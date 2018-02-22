@@ -308,6 +308,17 @@ void ImpressionistUI::cb_alphaSlides(Fl_Widget* o, void* v) {
     ((ImpressionistUI*)(o->user_data()))->m_alpha = double(((Fl_Slider *)o)->value());
 }
 
+void ImpressionistUI::cb_spacingSlides(Fl_Widget* o, void* v) {
+    ((ImpressionistUI*)(o->user_data()))->m_spacing = int(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_sizeRandLightButton(Fl_Widget* o, void* v) {
+    ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+
+    if (pUI->m_sizeRand == TRUE) pUI->m_sizeRand = FALSE;
+    else pUI->m_sizeRand = TRUE;
+}
+
 //---------------------------------- per instance functions --------------------------------------
 
 //------------------------------------------------
@@ -366,6 +377,51 @@ void ImpressionistUI::setSize( int size )
 	if (size<=40) 
 		m_BrushSizeSlider->value(m_nSize);
 }
+
+
+
+int ImpressionistUI::getSpacing() {
+    return m_spacing;
+}
+
+
+void ImpressionistUI::setSpacing(int spacing) {
+    m_spacing = spacing;
+
+    if (spacing >= 1 && spacing <= 16)
+        m_SpacingSlider->value(m_spacing);
+}
+
+bool ImpressionistUI::getSizeRand() {
+    return m_sizeRand;
+}
+
+
+void ImpressionistUI::setSizeRand(bool sizeRand) {
+    m_sizeRand = sizeRand;
+
+}
+
+
+void ImpressionistUI::cb_autoDrawButton(Fl_Widget* o, void* v) {
+    ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+    ImpressionistDoc* pDoc = pUI->getDocument();
+
+    //pDoc->autoDraw(((ImpressionistUI*)(o->user_data()))->m_spacing, ((ImpressionistUI*)(o->user_data()))->m_sizeRand, FALSE);
+    pUI->m_paintView->autoDrawAsked = 1;
+    pUI->m_paintView->redraw();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
@@ -442,6 +498,8 @@ ImpressionistUI::ImpressionistUI() {
     m_lineWidth = 1;
     m_lineAngle = 0;
     m_alpha = 1.00;
+    m_spacing = 1;
+    m_sizeRand = FALSE;
 
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
@@ -518,6 +576,28 @@ ImpressionistUI::ImpressionistUI() {
         m_AlphaSlider->value(m_alpha);
         m_AlphaSlider->align(FL_ALIGN_RIGHT);
         m_AlphaSlider->callback(cb_alphaSlides);
+
+
+        // Add spacing slider to the dialog 
+        m_SpacingSlider = new Fl_Value_Slider(10, 240, 120, 20, "Spacing");
+        m_SpacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
+        m_SpacingSlider->type(FL_HOR_NICE_SLIDER);
+        m_SpacingSlider->labelfont(FL_COURIER);
+        m_SpacingSlider->labelsize(12);
+        m_SpacingSlider->minimum(1);
+        m_SpacingSlider->maximum(16);
+        m_SpacingSlider->step(1);
+        m_SpacingSlider->value(m_spacing);
+        m_SpacingSlider->align(FL_ALIGN_RIGHT);
+        m_SpacingSlider->callback(cb_spacingSlides);
+
+        sizeRandLightButton = new Fl_Light_Button(200, 240, 100, 20, "&Random Size");
+        sizeRandLightButton->user_data((void*)(this));   // record self to be used by static callback functions
+        sizeRandLightButton->callback(cb_sizeRandLightButton);
+
+        Fl_Button* autoDrawButton = new Fl_Button(320, 240, 50, 20, "&Draw");
+        autoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
+        autoDrawButton->callback(cb_autoDrawButton);
 
 
     m_brushDialog->end();	

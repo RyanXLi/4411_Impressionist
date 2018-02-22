@@ -10,6 +10,8 @@
 #include "paintview.h"
 #include "ImpBrush.h"
 
+#include <Windows.h>
+
 
 #define LEFT_MOUSE_DOWN		1
 #define LEFT_MOUSE_DRAG		2
@@ -86,6 +88,51 @@ void PaintView::draw()
 	m_nStartCol		= scrollpos.x;
 	m_nEndCol		= m_nStartCol + drawWidth;
 
+
+    if (autoDrawAsked) {
+
+        // auto drawing
+
+        int spacing = m_pDoc->m_pUI->getSpacing();
+
+        for (int i = 0; i <= m_pDoc->m_screenWidth; i+=spacing) {
+            for (int j = 0; j <= m_pDoc->m_screenHeight; j+=spacing) {
+                m_pDoc->m_pCurrentBrush->BrushBegin({ i, j }, { i, j });
+                
+            }
+            glFlush();
+        }
+        
+        SaveCurrentContent();
+        RestoreContent();
+        autoDrawAsked = 0;
+        draw();
+
+        //m_pDoc->m_pCurrentBrush->BrushBegin({ xToDraw, yToDraw }, { xToDraw, yToDraw });
+        //glFlush();
+        //
+        //SaveCurrentContent();
+        //RestoreContent();
+        //
+        //if (xToDraw < m_pDoc->m_screenWidth) {
+        //    xToDraw += spacing;
+        //    draw();
+        //}
+        //else if (yToDraw < m_pDoc->m_screenHeight) {
+        //    xToDraw = 0;
+        //    yToDraw += spacing;
+        //    draw();
+        //}
+        //else {
+        //    autoDrawAsked = 0;
+        //    xToDraw = 0;
+        //    yToDraw = 0;
+        //}
+    }
+
+    
+
+
 	if ( m_pDoc->m_ucPainting && !isAnEvent) 
 	{
 		RestoreContent();
@@ -131,6 +178,8 @@ void PaintView::draw()
 			break;
 		}
 	}
+
+  
 
 	glFlush();
 
@@ -226,7 +275,7 @@ void PaintView::SaveCurrentContent()
 void PaintView::RestoreContent()
 {
 	glDrawBuffer(GL_BACK);
-
+    
 	glClear( GL_COLOR_BUFFER_BIT );
 
 	glRasterPos2i( 0, m_nWindowHeight - m_nDrawHeight );
