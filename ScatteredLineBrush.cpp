@@ -52,17 +52,15 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
     int numLinesPerBlock = 2 + frand() * 4;
 
     for (int i = 0; i < numLinesPerBlock; i++) {
-        double height = (frand() - 0.5) * size * 2;
-
-        double leftEnd = 0.5 * frand() * size * 2;
-        double rightEnd = -0.5 * frand() * size * 2;
+        double x = (frand() - 0.5) * size;
+        double y = (frand() - 0.5) * size;
 
         // TODO: out of bound
 
-        SetColorWithAlpha({source.x, source.y + (int)height});
+        SetColorWithAlpha({source.x + (int)x, source.y + (int)y});
 
-        glVertex2d(leftEnd, height);
-        glVertex2d(rightEnd, height);
+        glVertex2d(x - size * 0.5, y);
+        glVertex2d(x + size * 0.5, y);
 
     }
 
