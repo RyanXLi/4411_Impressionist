@@ -31,7 +31,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (0.5) To give your paintings more variety, add some additional brush types to the program. These brush strokes should be *substantially different* from those you are required to implement. You will get one whistle for each new brush (within reason).
 
-- [ ] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
+- [x] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
 
 - [x] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
 

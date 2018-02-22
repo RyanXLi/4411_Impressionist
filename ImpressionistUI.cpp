@@ -8,6 +8,7 @@
 #include <FL/fl_ask.h>
 
 #include <math.h>
+#include <algorithm>
 
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
@@ -231,6 +232,21 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 
 }
 
+//void ImpressionistUI::cb_exchange_contents(Fl_Menu_* o, void* v) {
+//    ImpressionistDoc* pDoc = whoami(o)->getDocument();
+//    
+//    GLubyte * intermediateCache = pDoc->m_pUI->m_paintView->cacheForExchange();
+//    pDoc->m_pUI->m_paintView->paintViewExchangeCache = pDoc->m_pUI->m_origView->cacheForExchange();
+//    pDoc->m_pUI->m_paintView->needToExchange = TRUE;
+//    pDoc->m_pUI->m_paintView->redraw();
+//
+//
+//
+//    pDoc->m_pUI->m_origView->originalViewExchangeCache = intermediateCache;
+//    pDoc->m_pUI->m_origView->needToExchange = TRUE;
+//    pDoc->m_pUI->m_origView->redraw();
+//
+//}
 
 
 //-----------------------------------------------------------
@@ -427,8 +443,8 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Load Image...",	FL_ALT + 'l', (Fl_Callback *)ImpressionistUI::cb_load_image },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_save_image },
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
-		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas, 0, FL_MENU_DIVIDER },
-		
+		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas },
+        //{ "&Exchange contents", FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_exchange_contents, 0, FL_MENU_DIVIDER },
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 

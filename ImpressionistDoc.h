@@ -99,7 +99,7 @@ private:
     Point* rightMouseStartPoint = nullptr;
     Point* rightMouseCurPoint = nullptr;
     Point* rightMouseEndPoint = nullptr;
-    GLubyte* framebufferCache;
+    GLubyte* framebufferCache = nullptr;
 
 public:
     int m_screenWidth = 600;

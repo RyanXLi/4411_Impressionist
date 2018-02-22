@@ -32,6 +32,8 @@ public:
 
     void autoDraw(int spacing, bool sizeRand, bool orderRand);
 
+    //GLubyte* cacheForExchange();
+
 private:
     void knuthShuffle(int* array, int len);
 
@@ -44,7 +46,11 @@ public:
     int xToDraw = 0;
     int yToDraw = 0;
 
-private:
+    GLubyte* paintViewExchangeCache = nullptr;
+    bool needToExchange = FALSE;
+
+
+//private: // TODO: change back
 	GLvoid* m_pPaintBitstart;
 	int		m_nDrawWidth,
 			m_nDrawHeight,

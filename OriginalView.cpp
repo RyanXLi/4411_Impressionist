@@ -61,6 +61,9 @@ void OriginalView::draw()
 		drawWidth	= min( m_nWindowWidth, m_pDoc->m_nWidth );
 		drawHeight	= min( m_nWindowHeight, m_pDoc->m_nHeight );
 
+        m_nDrawWidth = drawWidth;
+        m_nDrawHeight = drawHeight;
+
 		int	startrow	= m_pDoc->m_nHeight - (scrollpos.y + drawHeight);
 		if ( startrow < 0 ) 
 			startrow = 0;
@@ -89,6 +92,14 @@ void OriginalView::draw()
         }
 
 
+        if (needToExchange) {
+            glClear(GL_COLOR_BUFFER_BIT);
+            glDrawPixels(m_pDoc->m_screenWidth, m_pDoc->m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, originalViewExchangeCache);
+            needToExchange = FALSE;
+            //delete[] originalViewExchangeCache;
+        }
+
+
 	}
 			
 	glFlush();
@@ -104,4 +115,38 @@ void OriginalView::resizeWindow(int	width,
 {
 	resize(x(), y(), width, height);
 }
+
+
+//GLubyte* OriginalView::cacheForExchange() {
+//    if (originalViewExchangeCache != nullptr) { 
+//        delete[] originalViewExchangeCache;
+//        printf("OriginalView::cacheForExchange: ERROR, originalViewExchangeCache non-empty."); 
+//    }
+//
+//    //originalViewExchangeCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+//    //if (m_pDoc->hasDrawn) {
+//    //    glReadPixels(0, 0, m_pDoc->m_screenWidth, m_pDoc->m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, originalViewExchangeCache);
+//    //}
+//    //else {
+//    //    memset(originalViewExchangeCache, 0, 3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+//    //}
+//
+//    glReadBuffer(GL_FRONT);
+//
+//    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+//    glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+//
+//    originalViewExchangeCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+//    if (m_pDoc->hasDrawn) {
+//        glReadPixels(0,
+//            m_nWindowHeight - m_nDrawHeight,
+//            m_nDrawWidth,
+//            m_nDrawHeight,
+//            GL_RGB,
+//            GL_UNSIGNED_BYTE,
+//            originalViewExchangeCache);
+//    }
+//
+//    return originalViewExchangeCache;
+//}
 

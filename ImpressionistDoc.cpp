@@ -87,12 +87,30 @@ char* ImpressionistDoc::getImageName()
 void ImpressionistDoc::handleRightMouseDown(Point target) {
 
     if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
+    //if (target.x < 0 || target.x >= m_screenWidth
+    //    || target.y < m_nPaintHeight - m_pUI->m_paintView->m_nWindowHeight || target.y > m_nPaintHeight - m_pUI->m_paintView->m_nWindowHeight + m_screenHeight) {
+    //    return;
+    //}
 
     // cache framebuffer
 
+    // cache framebuffer
+    glReadBuffer(GL_FRONT);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, m_nPaintWidth);
+
     framebufferCache = (GLubyte*)malloc(3 * m_screenWidth * m_screenHeight);
+
+
     if (hasDrawn) {
-        glReadPixels(0, 0, m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+        glReadPixels(0,
+            m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight,
+            m_pUI->m_paintView->m_nDrawWidth,
+            m_pUI->m_paintView->m_nDrawHeight,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            framebufferCache);
     }
     else {
         memset(framebufferCache, 0, 3 * m_screenWidth * m_screenHeight);
@@ -118,9 +136,20 @@ void ImpressionistDoc::handleRightMouseDrag(Point target) {
     // clear current framebuffer
     // restore saved framebuffer
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+    // clear current framebuffer
+    // restore saved framebuffer
+    glDrawBuffer(GL_BACK);
 
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glRasterPos2i(0, m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_nPaintWidth);
+    glDrawPixels(m_pUI->m_paintView->m_nDrawWidth,
+        m_pUI->m_paintView->m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        framebufferCache);
 
     if (rightMouseCurPoint != nullptr) {
         delete rightMouseCurPoint;
@@ -148,8 +177,18 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 
     // clear current framebuffer
     // restore saved framebuffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+    glDrawBuffer(GL_BACK);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glRasterPos2i(0, m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_nPaintWidth);
+    glDrawPixels(m_pUI->m_paintView->m_nDrawWidth,
+        m_pUI->m_paintView->m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        framebufferCache);
 
     rightMouseEndPoint = new Point(target.x, target.y);
 

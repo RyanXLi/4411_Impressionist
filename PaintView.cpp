@@ -97,6 +97,29 @@ void PaintView::draw()
         autoDrawAsked = 0;
     }
 
+    //if (needToExchange) {
+    //    glDrawBuffer(GL_BACK);
+    //
+    //    glClear(GL_COLOR_BUFFER_BIT);
+    //
+    //    glRasterPos2i(0, m_nWindowHeight - m_nDrawHeight);
+    //    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+    //    glDrawPixels(m_nDrawWidth,
+    //        m_nDrawHeight,
+    //        GL_RGB,
+    //        GL_UNSIGNED_BYTE,
+    //        paintViewExchangeCache);
+    //
+    //    //glClear(GL_COLOR_BUFFER_BIT);
+    //    //glDrawPixels(m_pDoc->m_screenWidth, m_pDoc->m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, paintViewExchangeCache);
+    //    needToExchange = FALSE;
+    //    //delete[] paintViewExchangeCache;
+    //    //SaveCurrentContent();
+    //    //RestoreContent();
+    //}
+
+
 
 	if ( m_pDoc->m_ucPainting && !isAnEvent) 
 	{
@@ -112,17 +135,25 @@ void PaintView::draw()
 
 		Point source( coord.x + m_nStartCol, m_nEndRow - coord.y );
 		Point target( coord.x, m_nWindowHeight - coord.y );
+
+        printf("source: (%d, %d)\n", source.x, source.y);
+        printf("target: (%d, %d)\n\n", target.x, target.y);
+
+        
 		
 		// This is the event handler
 		switch (eventToDo) 
 		{
 		case LEFT_MOUSE_DOWN:
+            if (target.y < (m_nWindowHeight - m_pDoc->m_nPaintHeight) || target.x > m_pDoc->m_nPaintWidth) { break; }
 			m_pDoc->m_pCurrentBrush->BrushBegin( source, target );
 			break;
 		case LEFT_MOUSE_DRAG:
+            if (target.y < (m_nWindowHeight - m_pDoc->m_nPaintHeight) || target.x > m_pDoc->m_nPaintWidth) { break; }
 			m_pDoc->m_pCurrentBrush->BrushMove( source, target );
 			break;
 		case LEFT_MOUSE_UP:
+            
 			m_pDoc->m_pCurrentBrush->BrushEnd( source, target );
 
 			SaveCurrentContent();
@@ -142,6 +173,8 @@ void PaintView::draw()
 			printf("Unknown event!!\n");		
 			break;
 		}
+
+
 	}
 
   
@@ -186,7 +219,7 @@ int PaintView::handle(int event)
         sourceX = coord.x + m_nStartCol;
         sourceY = m_nEndRow - coord.y;
         if (sourceX >= 0 && sourceX < m_pDoc->m_screenWidth 
-            && sourceY >= 0 && sourceY < m_pDoc->m_screenWidth) {
+            && sourceY >= 0 && sourceY < m_pDoc->m_screenHeight) {
             m_pDoc->m_pUI->m_origView->needToDrawDot = TRUE;
             m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
             m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
@@ -219,7 +252,7 @@ int PaintView::handle(int event)
         sourceX = coord.x + m_nStartCol;
         sourceY = m_nEndRow - coord.y;
         if (sourceX >= 0 && sourceX < m_pDoc->m_screenWidth
-            && sourceY >= 0 && sourceY < m_pDoc->m_screenWidth) {
+            && sourceY >= 0 && sourceY < m_pDoc->m_screenHeight) {
             m_pDoc->m_pUI->m_origView->needToDrawDot = TRUE;
             m_pDoc->m_pUI->m_origView->brushLocation.x = Fl::event_x();
             m_pDoc->m_pUI->m_origView->brushLocation.y = Fl::event_y();
@@ -379,3 +412,32 @@ void PaintView::knuthShuffle(int* array, int len) {
     }
 
 }
+
+
+//GLubyte* PaintView::cacheForExchange() {
+//    if (paintViewExchangeCache != nullptr) { 
+//        delete[] paintViewExchangeCache;
+//        printf("PaintView::cacheForExchange: ERROR, paintViewExchangeCache non-empty."); 
+//    }
+//
+//    glReadBuffer(GL_FRONT);
+//
+//    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+//    glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+//
+//    paintViewExchangeCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+//    if (m_pDoc->hasDrawn) {
+//        glReadPixels(0,
+//            m_nWindowHeight - m_nDrawHeight,
+//            m_nDrawWidth,
+//            m_nDrawHeight,
+//            GL_RGB,
+//            GL_UNSIGNED_BYTE,
+//            paintViewExchangeCache);
+//    }
+//    else {
+//        memset(paintViewExchangeCache, 0, 3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+//    }
+//
+//    return paintViewExchangeCache;
+//}
