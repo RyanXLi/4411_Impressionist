@@ -35,6 +35,7 @@ public:
 
 // for brush dialog
 	Fl_Window*			m_brushDialog;
+    Fl_Window*			m_colorDialog;
 	Fl_Choice*			m_BrushTypeChoice;
     Fl_Choice*			m_StrokeDirectionChoice;
 
@@ -42,6 +43,13 @@ public:
     Fl_Slider*          m_LineWidthSlider;
     Fl_Slider*          m_LineAngleSlider;
     Fl_Slider*          m_AlphaSlider;
+    Fl_Slider*          m_SpacingSlider;
+
+    Fl_Slider*          m_RedSlider;
+    Fl_Slider*          m_GreenSlider;
+    Fl_Slider*          m_BlueSlider;
+
+    Fl_Light_Button*    sizeRandLightButton;
 
 
 	Fl_Button*          m_ClearCanvasButton;
@@ -62,6 +70,7 @@ public:
 
     int                 getLineWidth() {return m_lineWidth;}
     void                setLineWidth(int lineWidth) {
+        
         m_lineWidth = lineWidth;
 
         if (lineWidth >= 1 && lineWidth <= 40) {
@@ -87,6 +96,11 @@ public:
         }
     }
 
+    int                 getSpacing();
+    void                setSpacing(int spacing);
+    bool                getSizeRand();
+    void                setSizeRand(bool sizeRand);
+
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
 
@@ -95,6 +109,13 @@ private:
     int     m_lineWidth;
     int     m_lineAngle;
     double  m_alpha;
+    int     m_spacing;
+    bool    m_sizeRand;
+
+public:
+    double  m_red, m_green, m_blue; // modifiers from 0 to 2
+
+private:
 
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
@@ -109,6 +130,9 @@ private:
 	static void	cb_save_image(Fl_Menu_* o, void* v);
 	static void	cb_brushes(Fl_Menu_* o, void* v);
 	static void	cb_clear_canvas(Fl_Menu_* o, void* v);
+
+    static void cb_exchange_content(Fl_Menu_* o, void* v);
+
 	static void	cb_exit(Fl_Menu_* o, void* v);
 	static void	cb_about(Fl_Menu_* o, void* v);
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
@@ -116,9 +140,18 @@ private:
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 
+    static void	cb_color_dialog(Fl_Menu_* o, void* v);
+
+    static void cb_redSlides(Fl_Widget* o, void* v);
+    static void cb_greenSlides(Fl_Widget* o, void* v);
+    static void cb_blueSlides(Fl_Widget* o, void* v);
+
     static void	cb_lineWidthSlides(Fl_Widget* o, void* v);
     static void	cb_lineAngleSlides(Fl_Widget* o, void* v);
     static void	cb_alphaSlides(Fl_Widget* o, void* v);
+    static void	cb_spacingSlides(Fl_Widget* o, void* v);
+    static void cb_sizeRandLightButton(Fl_Widget* o, void* v);
+    static void cb_autoDrawButton(Fl_Widget* o, void* v);
 
 };
 

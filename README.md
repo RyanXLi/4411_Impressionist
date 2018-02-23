@@ -31,7 +31,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (0.5) To give your paintings more variety, add some additional brush types to the program. These brush strokes should be *substantially different* from those you are required to implement. You will get one whistle for each new brush (within reason).
 
-- [ ] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
+- [x] (0.5) The skeleton program allows the user to paint outside the boundary of the paint rectangle, then erases this region when the stroke is completed. Change this to clip brush strokes to the region as they're being painted.
 
 - [x] (0.5) When using your program, you currently can't see what part of the original image you're painting. Extend the program so that when the cursor is in the painting window, a marker appears on the original image showing where you're painting.
 
@@ -51,7 +51,7 @@ Here is a list of suggestions for extending the program. You are encouraged to c
 
 - [ ] (1.5) To make your painting more interesting, add "alpha-mapped" brush strokes. In other words, allow the user to load a bitmap representing a brush stroke. This bitmap would contain an alpha value at each position. Then when this brush is used to draw, a single color would be selected from the image, all pixels in the brush bitmap would be set to this RGB color (without changing the alpha value), and this partially transparent bitmap would be painted on the canvas. A new color would be used each time the brush is drawn.
 
-- [ ] (1.5) It can be time-consuming to paint an image manually. Add a feature so that a whole painting can be created *automatically*. The user should only have to specify a brush type, size, and angle to use. Then the program should automatically paint brush strokes over the entire image, using a randomized brush order and varying the brush attributes slightly as it goes (to increase realism).
+- [x] (1.5) It can be time-consuming to paint an image manually. Add a feature so that a whole painting can be created *automatically*. The user should only have to specify a brush type, size, and angle to use. Then the program should automatically paint brush strokes over the entire image, using a randomized brush order and varying the brush attributes slightly as it goes (to increase realism).
 
 - [ ] (1.5) At times, you may want the brush strokes to follow the gradient of a *different* image than the base image. Add a button(s) that will cause the direction of brush strokes to be automatically determined from a user specified image.
 

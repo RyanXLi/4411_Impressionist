@@ -9,6 +9,7 @@
 
 #include "impressionist.h"
 #include "bitmap.h"
+#include <vector>
 
 class ImpressionistUI;
 
@@ -40,10 +41,22 @@ public:
     //void    setAlpha(double alpha);
 
 	char*	getImageName();					// get the current image name
-	void setImageName(char* newName);
+	
     void handleRightMouseDown(Point target);  // for changing line angle by dragging
     void handleRightMouseDrag(Point target);
     void handleRightMouseUp(Point target);
+
+    //void autoDraw(int spacing, bool sizeRand, bool orderRand);
+
+    int applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
+    int applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
+
+    GLuint intensity(Point point) {
+        GLubyte red = (GetOriginalPixel(point))[0];
+        GLubyte green = (GetOriginalPixel(point))[1];
+        GLubyte blue = (GetOriginalPixel(point))[2];
+        return 0.299 * red + 0.587 * green + 0.114 * blue;
+    }
 
 
 
@@ -59,11 +72,6 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
-
-	//Bitmaps for blurred image and edge image
-	unsigned char*	m_ucBlurimage;
-	unsigned char*	m_ucEdgeimage;
-
 
 
 	// The current active brush.
@@ -85,17 +93,17 @@ public:
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
 
-	int GetOriginalGreyscale( int x, int y );
-
 
 private:
 	char			m_imageName[256];
     Point* rightMouseStartPoint = nullptr;
     Point* rightMouseCurPoint = nullptr;
     Point* rightMouseEndPoint = nullptr;
-    GLubyte* framebufferCache;
+    GLubyte* framebufferCache = nullptr;
+
+public:
     int m_screenWidth = 600;
-    int m_screenHeight = 300; // hardcoded in ImpressionistUI.cpp
+    int m_screenHeight = 300; // default values, TODO: getter setter
 
 };
 

@@ -7,7 +7,7 @@
 #include "impressionistUI.h"
 #include "ScatteredLineBrush.h"
 #include <math.h>
-#include <iostream>
+
 
 extern float frand();
 
@@ -27,14 +27,14 @@ void ScatteredLineBrush::BrushBegin(const Point source, const Point target) {
     
     glLineWidth(lineWidth);
 
-    firstClick=true;
-    lastCoor.x=source.x;
-    lastCoor.y=source.y;
+    firstClick = true;
+    lastCoor.x = source.x;
+    lastCoor.y = source.y;
+
     BrushMove(source, target);
 }
 
 void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
-	//std::cout<<lastCoor.x<<"  "<<lastCoor.y<<std::endl;
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
 
@@ -50,46 +50,71 @@ void ScatteredLineBrush::BrushMove(const Point source, const Point target) {
 
     glTranslatef(target.x, target.y, 0);
 
-    int angle=pDoc->getLineAngle();
-    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION){
-    	if(firstClick){
-    		firstClick=false;
-    		glPopMatrix();
-    		return;
-    	}
-    	else{
-    		angle=(int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
-    		lastCoor.x=source.x;
-    		lastCoor.y=source.y;
-
-    	}
+    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION) {
+        if (firstClick) {
+            firstClick = false;  
+        }
+        else {
+            int angle = (int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
+            pDoc->m_pUI->setLineAngle(angle);
+            lastCoor.x = source.x;
+            lastCoor.y = source.y;
+        }
     }
-    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT){
+    else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT) {
+        // apply matrix: gaussianBlur
+        std::vector<std::vector<int>> gaussianBlur = {
+            { 1, 2, 1 },
+            { 2, 4, 2 },
+            { 1, 2, 1 }
+        };
+        std::vector<std::vector<int>> blurred = {
+            { pDoc->applyMatrix({ source.x - 1, source.y + 1 }, gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix({ source.x,     source.y + 1 }, gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix({ source.x + 1, source.y + 1 }, gaussianBlur, 3, TRUE) },
 
+            { pDoc->applyMatrix({ source.x - 1, source.y }, gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix(source                   , gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix({ source.x + 1, source.y }, gaussianBlur, 3, TRUE) },
+
+            { pDoc->applyMatrix({ source.x - 1, source.y - 1 }, gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix({ source.x    , source.y - 1 }, gaussianBlur, 3, TRUE),
+            pDoc->applyMatrix({ source.x + 1, source.y - 1 }, gaussianBlur, 3, TRUE) }
+        };
+        // apply matrix: sobelX, sobelY
+        std::vector<std::vector<int>> sobelX = {
+            { 1, 0, -1 },
+            { 2, 0, -2 },
+            { 1, 0, -1 }
+        };
+        std::vector<std::vector<int>> sobelY = {
+            { 1, 2, 1 },
+            { 0, 0, 0 },
+            { -1, -2, -1 }
+        };
+
+
+        int sobelXresult = pDoc->applyMatrixToMatrix(blurred, sobelX, 3, FALSE);
+        int sobelYresult = pDoc->applyMatrixToMatrix(blurred, sobelY, 3, FALSE);
+
+
+        pDoc->m_pUI->setLineAngle(atan2(sobelYresult, sobelXresult) * 180 / M_PI + 90);
     }
-    glRotatef(angle, 0.0, 0.0, 1.0);
-    //std::cout<<angle<<std::endl;
 
-
+    glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);
 
     glBegin(GL_LINES);
 
     int numLinesPerBlock = 2 + frand() * 4;
 
     for (int i = 0; i < numLinesPerBlock; i++) {
-        double height = (frand() - 0.5) * size;
+        double x = (frand() - 0.5) * size;
+        double y = (frand() - 0.5) * size;
 
-        double oneEnd = (frand() - 0.5) * size;
-        double otherEnd = (frand() - 0.5) * size;
+        SetColorWithAlpha({source.x + (int)x, source.y + (int)y});
 
-        // TODO: out of bound
-
-        Point* pSource = new Point(source.x + 0.5 * (oneEnd + otherEnd),
-            source.y + height);
-        SetColorWithAlpha(*pSource);
-
-        glVertex2d(oneEnd, height);
-        glVertex2d(otherEnd, height);
+        glVertex2d(x - size * 0.5, y);
+        glVertex2d(x + size * 0.5, y);
 
     }
 

@@ -6,7 +6,8 @@
 #include "impressionistDoc.h"
 #include "impressionistUI.h"
 #include "LineBrush.h"
-#include "math.h"
+#include <math.h>
+#include <vector>
 
 extern float frand();
 
@@ -26,9 +27,11 @@ void LineBrush::BrushBegin(const Point source, const Point target) {
     int lineWidth = pDoc->getLineWidth();
     
     glLineWidth(lineWidth);
-    firstClick=true;
-    lastCoor.x=source.x;
-    lastCoor.y=source.y;
+
+    firstClick = true;
+    lastCoor.x = source.x;
+    lastCoor.y = source.y;
+
     BrushMove(source, target);
 }
 
@@ -47,29 +50,64 @@ void LineBrush::BrushMove(const Point source, const Point target) {
     int size = pDoc->getSize();
 
     glTranslatef(target.x, target.y, 0);
-    int angle=pDoc->getLineAngle();
-    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION){
-    	if(firstClick){
-    		firstClick=false;
-    		glPopMatrix();
-    		return;
-    	}
-    	else{
-    		angle=(int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
-    		lastCoor.x=source.x;
-    		lastCoor.y=source.y;
 
-    	}
+
+
+
+
+    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_BRUSH_DIRECTION) {
+        if (firstClick) {
+            firstClick = false;
+        }
+        else {
+            int angle = (int)(atan2(source.y - lastCoor.y, source.x - lastCoor.x) * 180 / M_PI);
+            pDoc->m_pUI->setLineAngle(angle);
+            lastCoor.x = source.x;
+            lastCoor.y = source.y;
+        }
     }
-    if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT){
-    	ImpressionistDoc* doc=GetDocument();
-    	int x1=doc->GetOriginalGreyscale(source.x,source.y);
-    	int x2=doc->GetOriginalGreyscale(source.x-1,source.y);
-    	int y1=doc->GetOriginalGreyscale(source.x,source.y);
-    	int y2=doc->GetOriginalGreyscale(source.x,source.y-1);
-    	angle=(int)(atan2(y1 - y2, x1-x2) * 180 / M_PI)+90;
+    else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT) {
+        // apply matrix: gaussianBlur
+        std::vector<std::vector<int>> gaussianBlur = { 
+            {1, 2, 1}, 
+            {2, 4, 2}, 
+            {1, 2, 1} 
+        };
+        std::vector<std::vector<int>> blurred = { 
+            { pDoc->applyMatrix({ source.x - 1, source.y + 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x,     source.y + 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y + 1 }, gaussianBlur, 3, TRUE) },
+
+            { pDoc->applyMatrix({ source.x - 1, source.y}, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix(source                   , gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y}, gaussianBlur, 3, TRUE) },
+
+            { pDoc->applyMatrix({ source.x - 1, source.y - 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x    , source.y - 1 }, gaussianBlur, 3, TRUE),
+              pDoc->applyMatrix({ source.x + 1, source.y - 1 }, gaussianBlur, 3, TRUE) }
+        };
+        // apply matrix: sobelX, sobelY
+        std::vector<std::vector<int>> sobelX = {
+            { 1, 0, -1 },
+            { 2, 0, -2 },
+            { 1, 0, -1 }
+        };
+        std::vector<std::vector<int>> sobelY = {
+            { 1, 2, 1 },
+            { 0, 0, 0 },
+            { -1, -2, -1 }
+        };
+
+
+        int sobelXresult = pDoc->applyMatrixToMatrix(blurred, sobelX, 3, FALSE);
+        int sobelYresult = pDoc->applyMatrixToMatrix(blurred, sobelY, 3, FALSE);
+        
+
+        pDoc->m_pUI->setLineAngle(atan2(sobelYresult, sobelXresult) * 180 / M_PI + 90);
     }
-    glRotatef(angle, 0.0, 0.0, 1.0);
+
+
+    glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);
 
     glBegin(GL_LINES);
 

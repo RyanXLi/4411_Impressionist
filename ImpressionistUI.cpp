@@ -8,6 +8,7 @@
 #include <FL/fl_ask.h>
 
 #include <math.h>
+#include <algorithm>
 
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
@@ -181,7 +182,6 @@ void ImpressionistUI::cb_load_image(Fl_Menu_* o, void* v)
 	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName() );
 	if (newfile != NULL) {
 		pDoc->loadImage(newfile);
-		pDoc->setImageName(newfile);
 	}
 }
 
@@ -210,6 +210,10 @@ void ImpressionistUI::cb_brushes(Fl_Menu_* o, void* v)
 	whoami(o)->m_brushDialog->show();
 }
 
+void ImpressionistUI::cb_color_dialog(Fl_Menu_* o, void* v) {
+    whoami(o)->m_colorDialog->show();
+}
+
 //------------------------------------------------------------
 // Clears the paintview canvas.
 // Called by the UI when the clear canvas menu item is chosen
@@ -229,9 +233,19 @@ void ImpressionistUI::cb_exit(Fl_Menu_* o, void* v)
 {
 	whoami(o)->m_mainWindow->hide();
 	whoami(o)->m_brushDialog->hide();
-
+    whoami(o)->m_colorDialog->hide();
 }
 
+void ImpressionistUI::cb_exchange_content(Fl_Menu_* o, void* v) {
+    ImpressionistDoc* pDoc = whoami(o)->getDocument();
+    
+    pDoc->m_pUI->m_paintView->needToExchange = 1 - pDoc->m_pUI->m_paintView->needToExchange;
+    pDoc->m_pUI->m_paintView->redraw();
+
+    pDoc->m_pUI->m_origView->needToExchange = 1 - pDoc->m_pUI->m_origView->needToExchange;
+    pDoc->m_pUI->m_origView->redraw();
+
+}
 
 
 //-----------------------------------------------------------
@@ -294,8 +308,6 @@ void ImpressionistUI::cb_sizeSlides(Fl_Widget* o, void* v)
 }
 
 
-
-
 void ImpressionistUI::cb_lineWidthSlides(Fl_Widget* o, void* v) 
 {
     ((ImpressionistUI*)(o->user_data()))->m_lineWidth = int(((Fl_Slider *)o)->value());
@@ -307,6 +319,28 @@ void ImpressionistUI::cb_lineAngleSlides(Fl_Widget* o, void* v) {
 
 void ImpressionistUI::cb_alphaSlides(Fl_Widget* o, void* v) {
     ((ImpressionistUI*)(o->user_data()))->m_alpha = double(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_spacingSlides(Fl_Widget* o, void* v) {
+    ((ImpressionistUI*)(o->user_data()))->m_spacing = int(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_redSlides(Fl_Widget* o, void* v) {
+    ((ImpressionistUI*)(o->user_data()))->m_red = double(((Fl_Slider *)o)->value());
+}
+void ImpressionistUI::cb_greenSlides(Fl_Widget* o, void* v) {
+    ((ImpressionistUI*)(o->user_data()))->m_green = double(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_blueSlides(Fl_Widget* o, void* v) {
+    ((ImpressionistUI*)(o->user_data()))->m_blue = double(((Fl_Slider *)o)->value());
+}
+
+void ImpressionistUI::cb_sizeRandLightButton(Fl_Widget* o, void* v) {
+    ImpressionistUI *pUI = ((ImpressionistUI*)(o->user_data()));
+
+    if (pUI->m_sizeRand == TRUE) pUI->m_sizeRand = FALSE;
+    else pUI->m_sizeRand = TRUE;
 }
 
 //---------------------------------- per instance functions --------------------------------------
@@ -368,14 +402,60 @@ void ImpressionistUI::setSize( int size )
 		m_BrushSizeSlider->value(m_nSize);
 }
 
+
+
+int ImpressionistUI::getSpacing() {
+    return m_spacing;
+}
+
+
+void ImpressionistUI::setSpacing(int spacing) {
+    m_spacing = spacing;
+
+    if (spacing >= 1 && spacing <= 16)
+        m_SpacingSlider->value(m_spacing);
+}
+
+bool ImpressionistUI::getSizeRand() {
+    return m_sizeRand;
+}
+
+
+void ImpressionistUI::setSizeRand(bool sizeRand) {
+    m_sizeRand = sizeRand;
+
+}
+
+
+void ImpressionistUI::cb_autoDrawButton(Fl_Widget* o, void* v) {
+    ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+    ImpressionistDoc* pDoc = pUI->getDocument();
+
+    //pDoc->autoDraw(((ImpressionistUI*)(o->user_data()))->m_spacing, ((ImpressionistUI*)(o->user_data()))->m_sizeRand, FALSE);
+    pUI->m_paintView->autoDrawAsked = 1;
+    pUI->m_paintView->redraw();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // Main menu definition
 Fl_Menu_Item ImpressionistUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
 		{ "&Load Image...",	FL_ALT + 'l', (Fl_Callback *)ImpressionistUI::cb_load_image },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_save_image },
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
-		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas, 0, FL_MENU_DIVIDER },
-		
+		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas },
+        { "&Colors",        FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_color_dialog },
+        { "&Exchange contents", FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_exchange_content, 0, FL_MENU_DIVIDER },
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
 
@@ -394,6 +474,7 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
   {"Scattered Points",	FL_ALT+'q', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_POINTS},
   {"Scattered Lines",	FL_ALT+'m', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_LINES},
   {"Scattered Circles",	FL_ALT+'d', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_SCATTERED_CIRCLES},
+  {"Filter",	        FL_ALT + 'f', (Fl_Callback *)ImpressionistUI::cb_brushChoice, (void *)BRUSH_FILTER},
   {0}
 };
 
@@ -442,6 +523,11 @@ ImpressionistUI::ImpressionistUI() {
     m_lineWidth = 1;
     m_lineAngle = 0;
     m_alpha = 1.00;
+    m_spacing = 4;
+    m_sizeRand = FALSE;
+    m_red = 1;
+    m_green = 1;
+    m_blue = 1;
 
 	// brush dialog definition
 	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
@@ -520,7 +606,73 @@ ImpressionistUI::ImpressionistUI() {
         m_AlphaSlider->callback(cb_alphaSlides);
 
 
+        // Add spacing slider to the dialog 
+        m_SpacingSlider = new Fl_Value_Slider(10, 240, 120, 20, "Spacing");
+        m_SpacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
+        m_SpacingSlider->type(FL_HOR_NICE_SLIDER);
+        m_SpacingSlider->labelfont(FL_COURIER);
+        m_SpacingSlider->labelsize(12);
+        m_SpacingSlider->minimum(1);
+        m_SpacingSlider->maximum(16);
+        m_SpacingSlider->step(1);
+        m_SpacingSlider->value(m_spacing);
+        m_SpacingSlider->align(FL_ALIGN_RIGHT);
+        m_SpacingSlider->callback(cb_spacingSlides);
+
+        sizeRandLightButton = new Fl_Light_Button(200, 240, 100, 20, "&Random Size");
+        sizeRandLightButton->user_data((void*)(this));   // record self to be used by static callback functions
+        sizeRandLightButton->callback(cb_sizeRandLightButton);
+
+        Fl_Button* autoDrawButton = new Fl_Button(320, 240, 50, 20, "&Draw");
+        autoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
+        autoDrawButton->callback(cb_autoDrawButton);
+
+
     m_brushDialog->end();	
 
+
+    m_colorDialog = new Fl_Window(400, 325, "Color Dialog");
+
+        // Add red slider to the dialog 
+        m_RedSlider = new Fl_Value_Slider(10, 20, 300, 25, " Red");
+        m_RedSlider->user_data((void*)(this));	// record self to be used by static callback functions
+        m_RedSlider->type(FL_HOR_NICE_SLIDER);
+        m_RedSlider->labelfont(FL_COURIER);
+        m_RedSlider->labelsize(12);
+        m_RedSlider->minimum(0);
+        m_RedSlider->maximum(2);
+        m_RedSlider->step(0.01);
+        m_RedSlider->value(m_red);
+        m_RedSlider->align(FL_ALIGN_RIGHT);
+        m_RedSlider->callback(cb_redSlides);
+
+        // Add red slider to the dialog 
+        m_GreenSlider = new Fl_Value_Slider(10, 60, 300, 25, " Green");
+        m_GreenSlider->user_data((void*)(this));	// record self to be used by static callback functions
+        m_GreenSlider->type(FL_HOR_NICE_SLIDER);
+        m_GreenSlider->labelfont(FL_COURIER);
+        m_GreenSlider->labelsize(12);
+        m_GreenSlider->minimum(0);
+        m_GreenSlider->maximum(2);
+        m_GreenSlider->step(0.01);
+        m_GreenSlider->value(m_green);
+        m_GreenSlider->align(FL_ALIGN_RIGHT);
+        m_GreenSlider->callback(cb_greenSlides);
+
+        // Add red slider to the dialog 
+        m_BlueSlider = new Fl_Value_Slider(10, 100, 300, 25, " Blue");
+        m_BlueSlider->user_data((void*)(this));	// record self to be used by static callback functions
+        m_BlueSlider->type(FL_HOR_NICE_SLIDER);
+        m_BlueSlider->labelfont(FL_COURIER);
+        m_BlueSlider->labelsize(12);
+        m_BlueSlider->minimum(0);
+        m_BlueSlider->maximum(2);
+        m_BlueSlider->step(0.01);
+        m_BlueSlider->value(m_blue);
+        m_BlueSlider->align(FL_ALIGN_RIGHT);
+        m_BlueSlider->callback(cb_blueSlides);
+
+
+    m_colorDialog->end();
 
 }

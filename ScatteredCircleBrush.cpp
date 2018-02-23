@@ -44,6 +44,14 @@ void ScatteredCircleBrush::BrushMove(const Point source, const Point target) {
     int size = pDoc->getSize();
     int numCirclesPerBlock = 3;
 
+    if (size == 1) {
+        glPointSize(1);
+        glBegin(GL_POINTS);
+        glVertex2f(target.x, target.y);
+        glEnd();
+        return;
+    }
+
     for (int i = 0; i < numCirclesPerBlock; i++) {
 
         double xVar = (frand() - 0.5) * size;

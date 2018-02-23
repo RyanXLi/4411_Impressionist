@@ -53,6 +53,7 @@ void OriginalView::draw()
 
 		int drawWidth, drawHeight;
 		GLvoid* bitstart;
+        GLvoid* paintstart;
 
 		// we are not using a scrollable window, so ignore it
 		Point scrollpos;	// = GetScrollPosition();
@@ -61,30 +62,41 @@ void OriginalView::draw()
 		drawWidth	= min( m_nWindowWidth, m_pDoc->m_nWidth );
 		drawHeight	= min( m_nWindowHeight, m_pDoc->m_nHeight );
 
+        m_nDrawWidth = drawWidth;
+        m_nDrawHeight = drawHeight;
+
 		int	startrow	= m_pDoc->m_nHeight - (scrollpos.y + drawHeight);
 		if ( startrow < 0 ) 
 			startrow = 0;
 
 
 		bitstart = m_pDoc->m_ucBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+        paintstart = m_pDoc->m_ucPainting + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
 
 		// just copy image to GLwindow conceptually
 		glRasterPos2i( 0, m_nWindowHeight - drawHeight );
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 		glPixelStorei( GL_UNPACK_ROW_LENGTH, m_pDoc->m_nWidth );
 		glDrawBuffer( GL_BACK );
-		glDrawPixels( drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, bitstart );
+        if (needToExchange) {
+            glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, paintstart);
+        }
+        else {
+            glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, bitstart);
+        }
 
-		if (brushEntered){
-			glPointSize(5.0);
-			GLubyte color[4]={255,0,0,255};
-			glColor4ubv(color);
+        if (needToDrawDot) {
 
-			glBegin( GL_POINTS );
-				glVertex2d( brushLocation.x+scrollpos.x,
-						m_nWindowHeight - brushLocation.y );
-			glEnd();
-		}
+            glPointSize(5.0);
+            GLubyte color[4] = { 255,0,0,255 };
+            glColor4ubv(color);
+
+            glBegin(GL_POINTS);
+            glVertex2d(brushLocation.x + scrollpos.x,
+                m_nWindowHeight - brushLocation.y);
+            glEnd();
+
+        }
 
 
 	}
@@ -103,3 +115,65 @@ void OriginalView::resizeWindow(int	width,
 	resize(x(), y(), width, height);
 }
 
+
+GLubyte* OriginalView::cacheForExchange() {
+
+    //originalViewExchangeCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+    //if (m_pDoc->hasDrawn) {
+    //    glReadPixels(0, 0, m_pDoc->m_screenWidth, m_pDoc->m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, originalViewExchangeCache);
+    //}
+    //else {
+    //    memset(originalViewExchangeCache, 0, 3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+    //}
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+
+    GLubyte* exchangeCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+    glReadPixels(0,
+        0,
+        m_nDrawWidth,
+        m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        exchangeCache);
+
+    return exchangeCache;
+}
+
+void OriginalView::SaveCurrentContent() {
+    // Tell openGL to read from the front buffer when capturing
+    // out paint strokes
+
+    contentCache = (GLubyte*)malloc(3 * m_pDoc->m_screenWidth * m_pDoc->m_screenHeight);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+
+    glReadPixels(0,
+        m_nWindowHeight - m_nDrawHeight,
+        m_nDrawWidth,
+        m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        contentCache);
+}
+
+
+void OriginalView::RestoreContent() {
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glRasterPos2i(0, m_nWindowHeight - m_nDrawHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_pDoc->m_nPaintWidth);
+    glDrawPixels(m_nDrawWidth,
+        m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        contentCache);
+
+    delete[] contentCache;
+
+    //	glDrawBuffer(GL_FRONT);
+}

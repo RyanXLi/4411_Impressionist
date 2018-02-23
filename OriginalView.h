@@ -29,15 +29,27 @@ public:
 	void refresh();
 
 	void resizeWindow(int width, int height);
+    
+    GLubyte* cacheForExchange();
+    void SaveCurrentContent();
+    void RestoreContent();
+
 
 	ImpressionistDoc*	m_pDoc;
 
-	Point brushLocation;
-	bool brushEntered=false;
+    Point brushLocation;
+    bool needToDrawDot = FALSE;
+    bool needToExchange = FALSE;
+
+    GLubyte* originalViewExchangeCache = nullptr;
+    GLubyte* contentCache = nullptr;
+
 
 private:
 	int	m_nWindowWidth, 
-		m_nWindowHeight;
+		m_nWindowHeight,
+        m_nDrawWidth,
+        m_nDrawHeight;
 
 };
 

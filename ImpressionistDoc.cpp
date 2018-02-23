@@ -12,6 +12,8 @@
 
 #include "ImpBrush.h"
 #include <math.h>
+#include <random>
+#include <algorithm>
 
 // Include individual brush headers here.
 #include "PointBrush.h"
@@ -20,8 +22,8 @@
 #include "ScatteredPointBrush.h"
 #include "ScatteredLineBrush.h"
 #include "ScatteredCircleBrush.h"
-#include <vector>
-#include <algorithm>
+#include "FilterBrush.h"
+
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 extern int NUM_OF_TRIANGLE = 20;
@@ -35,8 +37,7 @@ ImpressionistDoc::ImpressionistDoc()
 	m_nWidth		= -1;
 	m_ucBitmap		= NULL;
 	m_ucPainting	= NULL;
-	m_ucBlurimage	= NULL;
-	m_ucEdgeimage	= NULL;
+
 
 	// create one instance of each brush
 	ImpBrush::c_nBrushCount	= NUM_BRUSH_TYPE;
@@ -55,6 +56,8 @@ ImpressionistDoc::ImpressionistDoc()
 		= new ScatteredLineBrush( this, "Scattered Lines" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_CIRCLES]	
 		= new ScatteredCircleBrush( this, "Scattered Circles" );
+    ImpBrush::c_pBrushes[BRUSH_FILTER]
+        = new FilterBrush(this, "Filter");
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
@@ -84,12 +87,28 @@ char* ImpressionistDoc::getImageName()
 void ImpressionistDoc::handleRightMouseDown(Point target) {
 
     if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
+    //if (target.x < 0 || target.x >= m_screenWidth
+    //    || target.y < m_nPaintHeight - m_pUI->m_paintView->m_nWindowHeight || target.y > m_nPaintHeight - m_pUI->m_paintView->m_nWindowHeight + m_screenHeight) {
+    //    return;
+    //}
 
     // cache framebuffer
+    glReadBuffer(GL_FRONT);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ROW_LENGTH, m_nPaintWidth);
 
     framebufferCache = (GLubyte*)malloc(3 * m_screenWidth * m_screenHeight);
+
+
     if (hasDrawn) {
-        glReadPixels(0, 0, m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+        glReadPixels(0,
+            m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight,
+            m_pUI->m_paintView->m_nDrawWidth,
+            m_pUI->m_paintView->m_nDrawHeight,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            framebufferCache);
     }
     else {
         memset(framebufferCache, 0, 3 * m_screenWidth * m_screenHeight);
@@ -114,10 +133,18 @@ void ImpressionistDoc::handleRightMouseDrag(Point target) {
 
     // clear current framebuffer
     // restore saved framebuffer
+    glDrawBuffer(GL_BACK);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+    glClear(GL_COLOR_BUFFER_BIT);
 
+    glRasterPos2i(0, m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_nPaintWidth);
+    glDrawPixels(m_pUI->m_paintView->m_nDrawWidth,
+        m_pUI->m_paintView->m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        framebufferCache);
 
     if (rightMouseCurPoint != nullptr) {
         delete rightMouseCurPoint;
@@ -145,12 +172,22 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 
     // clear current framebuffer
     // restore saved framebuffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawPixels(m_screenWidth, m_screenHeight, GL_RGB, GL_UNSIGNED_BYTE, framebufferCache);
+    glDrawBuffer(GL_BACK);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glRasterPos2i(0, m_pUI->m_paintView->m_nWindowHeight - m_pUI->m_paintView->m_nDrawHeight);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, m_nPaintWidth);
+    glDrawPixels(m_pUI->m_paintView->m_nDrawWidth,
+        m_pUI->m_paintView->m_nDrawHeight,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        framebufferCache);
 
     rightMouseEndPoint = new Point(target.x, target.y);
 
-    // TODO: calculate line angle
+    // calculate line angle
     Point* upperPoint = rightMouseEndPoint->y > rightMouseStartPoint->y ? 
         rightMouseEndPoint : rightMouseStartPoint;
 
@@ -160,6 +197,99 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
     m_pUI->setLineAngle(
         (int)(atan2(upperPoint->y - lowerPoint->y, upperPoint->x - lowerPoint->x) * 180 / M_PI));
 }
+
+
+
+int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+    // suppose input valid
+    int weightSum = 0;
+
+    if (useWeightSum) {
+        for (int i = 0; i < matrixDim; i++) {
+            for (int j = 0; j < matrixDim; j++) {
+                weightSum += matrix[i][j];
+            }
+        }
+    }
+
+    GLuint pxColor = 0;
+    GLuint finalColor = 0;
+
+    for (int i = 0; i < matrixDim; i++) {
+        for (int j = 0; j < matrixDim; j++) {
+            int y = source.y + i - (matrixDim - 1) / 2;
+            int x = source.x + j - (matrixDim - 1) / 2;
+
+            if (x < 0 && y < 0) {
+                pxColor = intensity(Point(0, 0));
+            }
+            else if (x < 0 && y >= m_screenHeight) {
+                pxColor = intensity(Point(0, m_screenHeight - 1));
+            }
+            else if (x >= m_screenWidth && y < 0) {
+                pxColor = intensity(Point(m_screenWidth - 1, 0));
+            }
+            else if (x >= m_screenWidth && y >= m_screenHeight) {
+                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1));
+            }
+            else if (x < 0) {
+                pxColor = intensity(Point(0, y));
+            }
+            else if (x >= m_screenWidth) {
+                pxColor = intensity(Point(m_screenWidth - 1, y));
+            }
+            else if (y < 0) {
+                pxColor = intensity(Point(x, 0));
+            }
+            else if (y >= m_screenHeight) {
+                pxColor = intensity(Point(x, m_screenHeight - 1));
+            }
+            else {
+                pxColor = intensity(Point(x, y));
+            }
+
+            finalColor += pxColor * matrix[i][j];
+        }
+    }
+
+    if (useWeightSum) finalColor /= weightSum;
+
+    return finalColor;
+}
+
+
+int ImpressionistDoc::applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+    // suppose input valid
+    // assume `originalMatrix` and `matrix` both have dimension `matrixDim`
+
+
+    int weightSum = 0;
+
+    if (useWeightSum) {
+        for (int i = 0; i < matrixDim; i++) {
+            for (int j = 0; j < matrixDim; j++) {
+                weightSum += matrix[i][j];
+            }
+        }
+    }
+
+    GLuint pxColor = 0;
+    GLuint finalColor = 0;
+
+    for (int i = 0; i < matrixDim; i++) {
+        for (int j = 0; j < matrixDim; j++) {
+            int y = i;
+            int x = j;
+
+            finalColor += originalMatrix[x][y] * matrix[i][j];
+        }
+    }
+    
+    if (useWeightSum) finalColor /= weightSum;
+
+    return finalColor;
+}
+
 
 
 
@@ -178,50 +308,74 @@ void ImpressionistDoc::setBrushType(int type)
         case BRUSH_POINTS:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
-
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_LINES:
             m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->m_LineWidthSlider->activate();
             m_pUI->m_LineAngleSlider->activate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_CIRCLES:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_POINTS:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_LINES:
             m_pUI->m_StrokeDirectionChoice->activate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->m_LineWidthSlider->activate();
             m_pUI->m_LineAngleSlider->activate();
+            m_pUI->m_AlphaSlider->activate();
             break;
 
         case BRUSH_SCATTERED_CIRCLES:
             setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
+            break;
+
+        case BRUSH_FILTER:
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->setSize(1);
+            m_pUI->m_BrushSizeSlider->deactivate();
+            m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->setAlpha(0.0);
+            m_pUI->m_AlphaSlider->deactivate();
             break;
 
         default:
@@ -254,20 +408,8 @@ double ImpressionistDoc::getAlpha() {
     return m_pUI->getAlpha();
 }
 
-int entry(int row,int col,int width){
-	return row*width+col;
-}
 
-int Medium(int row, int col, int width, unsigned char* matrix){
-	std::vector<int> v;
-	for (int i=-1;i<2;i++){
-		for (int j=-1;j<2;j++){
-			v.push_back(matrix[entry(row+i,col+j,width)]);
-		}
-	}
-	sort(v.begin(),v.end());
-	return v[5];
-}
+
 
 //---------------------------------------------------------
 // Load the specified image
@@ -293,10 +435,13 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_nHeight		= height;
 	m_nPaintHeight	= height;
 
+    // ADDED
+    m_screenHeight = height;
+    m_screenWidth = width;
+
 	// release old storage
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
-
 
 	m_ucBitmap		= data;
 
@@ -317,71 +462,7 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_pUI->m_paintView->resizeWindow(width, height);	
 	m_pUI->m_paintView->refresh();
 
-	if ( m_ucBlurimage ) delete [] m_ucBlurimage;
-	if ( m_ucEdgeimage ) delete [] m_ucEdgeimage;
-	//start computing the blurred image and edge image:
-	//1. compute grey image
-	//2. construct margins for grey image
-	//3. compute blurred image
-	//4. compute edge image
 
-	//1
-	unsigned char* Greyimage=new unsigned char[height*width];
-	for (int i = 0; i < height*width; i++){
-		int scale = round(0.299*data[3*i]+0.587*data[3*i+1]+0.144*data[3*i+2]);
-		Greyimage[i]=scale;
-	}
-
-	//2
-	unsigned char* GreyimageWithMargins=new unsigned char[(height+2)*(width+2)];
-	GreyimageWithMargins[0]=Greyimage[0];
-	GreyimageWithMargins[width+1]=Greyimage[width-1];
-	GreyimageWithMargins[(height+2)*(width+2)-1]=Greyimage[height*width-1];
-	GreyimageWithMargins[(height+1)*(width+2)]=Greyimage[(height-1)*width];
-	for (int row=0;row<height+2;row++){
-		for (int col=0;col<width+2;col++){
-			if (row==0 && col==0){
-				GreyimageWithMargins[0]=Greyimage[0];
-			}
-			else if(row==0 && col==width+1){
-				GreyimageWithMargins[width+1]=Greyimage[width-1];
-			}
-			else if(row==height+1 && col==0){
-				GreyimageWithMargins[(height+1)*(width+2)]=Greyimage[(height-1)*width];
-			}
-			else if(row==height+1 && col==width+1){
-				GreyimageWithMargins[(height+2)*(width+2)-1]=Greyimage[height*width-1];
-			}
-			else if (row==0){
-				GreyimageWithMargins[row*(width+2)+col]=Greyimage[col-1];
-			}
-			else if (col==0){
-				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width];
-			}
-			else if(row==height+1){
-				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width+col-1];
-			}
-			else if(col==width+1){
-				GreyimageWithMargins[row*(width+2)+col]=Greyimage[row*width];
-			}
-			else{
-				GreyimageWithMargins[row*(width+2)+col]=Greyimage[(row-1)*width+col-1];
-			}
-		}
-	}
-	//3
-	m_ucBlurimage=new unsigned char[height*width];
-	for (int row=1;row<height+1;row++){
-		for (int col=1;col<width+1;col++){
-			m_ucBlurimage[(row-1)*width+col-1]=Medium(row,col,width, GreyimageWithMargins);
-		}
-	}
-
-	//4
-	// To do: compute edge image with threshold
-
-	delete GreyimageWithMargins;
-	delete Greyimage;
 	return 1;
 }
 
@@ -438,7 +519,17 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
 	else if ( y >= m_nHeight ) 
 		y = m_nHeight-1;
 
-	return (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+    GLubyte* targetPixel;
+    if (m_pUI->m_paintView->needToExchange) {
+        targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
+    }
+    else {
+        targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+    }
+    GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
+        (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
+        (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
+    return processedPixel;
 }
 
 //----------------------------------------------------------------
@@ -449,20 +540,3 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 	return GetOriginalPixel( p.x, p.y );
 }
 
-int ImpressionistDoc::GetOriginalGreyscale( int x, int y ){
-	if ( x < 0 )
-		x = 0;
-	else if ( x >= m_nWidth )
-		x = m_nWidth-1;
-
-	if ( y < 0 )
-		y = 0;
-	else if ( y >= m_nHeight )
-		y = m_nHeight-1;
-
-	return m_ucBlurimage[y*m_nWidth + x];
-}
-
-void ImpressionistDoc::setImageName(char* newName){
-	strcpy(m_imageName, newName);
-}
