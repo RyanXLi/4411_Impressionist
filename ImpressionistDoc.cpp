@@ -455,14 +455,91 @@ int ImpressionistDoc::loadImage(char *iname)
 
 	// display it on origView
 	m_pUI->m_origView->resizeWindow(width, height);	
+    m_pUI->m_origView->displayImage = DISPLAY_MAIN;
 	m_pUI->m_origView->refresh();
 
 	// refresh paint view as well
 	m_pUI->m_paintView->resizeWindow(width, height);	
 	m_pUI->m_paintView->refresh();
 
+    mainImageLoaded = TRUE;
 
 	return 1;
+}
+
+
+int ImpressionistDoc::loadAnotherImage(char *iname) {
+
+    // try to open the image to read
+    unsigned char*	data;
+    int				width,
+        height;
+
+    if ((data = readBMP(iname, width, height)) == NULL) {
+        fl_alert("Can't load bitmap file");
+        return 0;
+    }
+
+    // reflect the fact of loading the new image
+    if (m_nWidth != width || m_nHeight != height) {
+        fl_alert("Different image dimension");
+        return 0;
+    }
+
+
+    //// release old storage
+    //if (m_ucBitmap) delete[] m_ucBitmap;
+    //if (m_ucPainting) delete[] m_ucPainting;
+
+    m_ucOtherBitmap = data;
+
+    // allocate space for draw view
+    //m_ucPainting = new unsigned char[width*height * 3];
+    //memset(m_ucPainting, 0, width*height * 3);
+    //
+    //m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(),
+    //    m_pUI->m_mainWindow->y(),
+    //    width * 2,
+    //    height + 25);
+
+    // display it on origView
+    m_pUI->m_origView->displayImage = DISPLAY_OTHER;
+    m_pUI->m_origView->refresh();
+
+    otherImageLoaded = true;
+
+    return 1;
+}
+
+
+int ImpressionistDoc::loadEdgeImage(char *iname) {
+
+    // try to open the image to read
+    unsigned char*	data;
+    int				width,
+        height;
+
+    if ((data = readBMP(iname, width, height)) == NULL) {
+        fl_alert("Can't load bitmap file");
+        return 0;
+    }
+
+    // reflect the fact of loading the new image
+    if (m_nWidth != width || m_nHeight != height) {
+        fl_alert("Different image dimension");
+        return 0;
+    }
+
+    m_ucEdgeBitmap = data;
+
+
+    // display it on origView
+    m_pUI->m_origView->displayImage = DISPLAY_EDGE;
+    m_pUI->m_origView->refresh();
+
+    edgeImageLoaded = true;
+
+    return 1;
 }
 
 
@@ -522,9 +599,15 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
     if (m_pUI->m_paintView->needToExchange) {
         targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
     }
-    else {
+    else if (m_pUI->m_origView->displayImage == DISPLAY_OTHER) {
+        targetPixel = (GLubyte*)(m_ucOtherBitmap + 3 * (y*m_nWidth + x));
+    }
+    else //DISPLAY_MAIN or EDGE
+    {
         targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
     }
+
+
     GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
         (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
         (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
@@ -537,5 +620,24 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
 GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 {
 	return GetOriginalPixel( p.x, p.y );
+}
+
+
+void ImpressionistDoc::disolve() {
+    //disolve main and the other image
+    if (!mainImageLoaded) {
+        fl_alert("Main image not loaded");
+        return;
+    }
+    if (!otherImageLoaded) {
+        fl_alert("Other image not loaded");
+        return;
+    }
+
+    for (int i = 0; i < 3 * m_nPaintWidth*m_nPaintHeight; i++) {
+        *(m_ucPainting + i) = *(m_ucBitmap + i) * 0.5 + *(m_ucOtherBitmap + i) * 0.5;
+    }
+
+    m_pUI->m_paintView->redraw();
 }
 

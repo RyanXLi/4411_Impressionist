@@ -17,6 +17,7 @@
 #include <stdlib.h>
 
 #include "ImpBrush.h"
+#include "impressionistDoc.h"
 
 class ImpressionistDoc;
 
@@ -46,10 +47,12 @@ public:
 
 
 private:
-	int	m_nWindowWidth, 
-		m_nWindowHeight,
+    int	m_nWindowWidth,
+        m_nWindowHeight,
         m_nDrawWidth,
         m_nDrawHeight;
+public:
+    int displayImage = DISPLAY_MAIN;
 
 };
 

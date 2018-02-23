@@ -186,6 +186,25 @@ void ImpressionistUI::cb_load_image(Fl_Menu_* o, void* v)
 }
 
 
+void ImpressionistUI::cb_load_other_image(Fl_Menu_* o, void* v) {
+    ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+    char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+    if (newfile != NULL) {
+        pDoc->loadAnotherImage(newfile);
+    }
+}
+
+void ImpressionistUI::cb_load_edge_image(Fl_Menu_* o, void* v) {
+    ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+    char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+    if (newfile != NULL) {
+        pDoc->loadEdgeImage(newfile);
+    }
+}
+
+
 //------------------------------------------------------------------
 // Brings up a file chooser and then saves the painted image
 // This is called by the UI when the save image menu item is chosen
@@ -223,6 +242,12 @@ void ImpressionistUI::cb_clear_canvas(Fl_Menu_* o, void* v)
 	ImpressionistDoc* pDoc=whoami(o)->getDocument();
 
 	pDoc->clearCanvas();
+}
+
+
+void ImpressionistUI::cb_disolve(Fl_Menu_* o, void* v) {
+    ImpressionistDoc* pDoc = whoami(o)->getDocument();
+    pDoc->disolve();
 }
 
 //------------------------------------------------------------
@@ -273,6 +298,20 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 	pDoc->setBrushType(type);
 
     // printf("cb_brushChoice called with type %d", type);
+}
+
+void ImpressionistUI::cbDisplayChoice(Fl_Menu_* o, void* v)     {
+
+    ImpressionistDoc *pDoc = whoami(o)->getDocument();
+
+    int type = (int)v;
+    if (type == DISPLAY_OTHER && !pDoc->otherImageLoaded) {
+        fl_alert("other image not loaded");
+        return;
+    }
+
+    pDoc->m_pUI->m_origView->displayImage = type;
+    pDoc->m_pUI->m_origView->redraw();
 }
 
 
@@ -461,11 +500,22 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Load Image...",	FL_ALT + 'l', (Fl_Callback *)ImpressionistUI::cb_load_image },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_save_image },
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
-		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas },
-        { "&Colors",        FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_color_dialog },
-        { "&Exchange contents", FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_exchange_content, 0, FL_MENU_DIVIDER },
+		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas },       
+        { "&Load Other(Mural) Image",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_load_other_image },  
+        { "&Load Edge Image",	FL_ALT + 'h', (Fl_Callback *)ImpressionistUI::cb_load_edge_image },
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
+    { "&Function",		0, 0, 0, FL_SUBMENU },
+        { "&Colors",        FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_color_dialog },
+        { "&Exchange contents", FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_exchange_content},
+        { "&Disolve",        FL_ALT + 'i', (Fl_Callback *)ImpressionistUI::cb_disolve },
+        { 0 },
+    { "&Display",		0, 0, 0, FL_SUBMENU },
+        { "&Display original",	FL_ALT + 'd', (Fl_Callback *)ImpressionistUI::cbDisplayChoice, (void *)DISPLAY_MAIN },
+        { "&Display the other",	FL_ALT + 'f', (Fl_Callback *)ImpressionistUI::cbDisplayChoice, (void *)DISPLAY_OTHER },
+        { "&Display edge",	FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cbDisplayChoice, (void *)DISPLAY_EDGE },
+        {0},
+
 
 	{ "&Help",		0, 0, 0, FL_SUBMENU },
 		{ "&About",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_about },

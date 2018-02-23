@@ -54,6 +54,8 @@ void OriginalView::draw()
 		int drawWidth, drawHeight;
 		GLvoid* bitstart;
         GLvoid* paintstart;
+        GLvoid* otherBitStart;
+        GLvoid* edgeBitStart;
 
 		// we are not using a scrollable window, so ignore it
 		Point scrollpos;	// = GetScrollPosition();
@@ -71,6 +73,8 @@ void OriginalView::draw()
 
 
 		bitstart = m_pDoc->m_ucBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+        otherBitStart = m_pDoc->m_ucOtherBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+        edgeBitStart = m_pDoc->m_ucEdgeBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
         paintstart = m_pDoc->m_ucPainting + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
 
 		// just copy image to GLwindow conceptually
@@ -82,11 +86,19 @@ void OriginalView::draw()
             glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, paintstart);
         }
         else {
-            glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, bitstart);
+            if (displayImage == DISPLAY_MAIN) {
+                glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, bitstart);
+            }
+            else if (displayImage == DISPLAY_OTHER) {
+                glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, otherBitStart);
+            }
+            else if (displayImage == DISPLAY_EDGE) {
+                glDrawPixels(drawWidth, drawHeight, GL_RGB, GL_UNSIGNED_BYTE, edgeBitStart);
+            }
+
         }
 
         if (needToDrawDot) {
-
             glPointSize(5.0);
             GLubyte color[4] = { 255,0,0,255 };
             glColor4ubv(color);
@@ -95,7 +107,6 @@ void OriginalView::draw()
             glVertex2d(brushLocation.x + scrollpos.x,
                 m_nWindowHeight - brushLocation.y);
             glEnd();
-
         }
 
 

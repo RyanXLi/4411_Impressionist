@@ -11,6 +11,13 @@
 #include "bitmap.h"
 #include <vector>
 
+
+enum {
+    DISPLAY_MAIN = 0,
+    DISPLAY_OTHER,
+    DISPLAY_EDGE
+};
+
 class ImpressionistUI;
 
 class ImpressionistDoc 
@@ -51,6 +58,8 @@ public:
     int applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
     int applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
 
+    void disolve();
+
     GLuint intensity(Point point) {
         GLubyte red = (GetOriginalPixel(point))[0];
         GLubyte green = (GetOriginalPixel(point))[1];
@@ -58,6 +67,8 @@ public:
         return 0.299 * red + 0.587 * green + 0.114 * blue;
     }
 
+    int loadAnotherImage(char *iname);
+    int loadEdgeImage(char *iname);
 
 
 
@@ -72,6 +83,12 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
+    unsigned char*  m_ucOtherBitmap;
+    unsigned char*  m_ucEdgeBitmap;
+
+    bool mainImageLoaded = false;
+    bool otherImageLoaded = false;
+    bool edgeImageLoaded = false;
 
 
 	// The current active brush.

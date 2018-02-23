@@ -128,15 +128,19 @@ private:
 	// All callbacks here.  Callbacks are declared 
 	// static
 	static void	cb_load_image(Fl_Menu_* o, void* v);
+    static void cb_load_other_image(Fl_Menu_* o, void* v);
+    static void cb_load_edge_image(Fl_Menu_* o, void* v);
 	static void	cb_save_image(Fl_Menu_* o, void* v);
 	static void	cb_brushes(Fl_Menu_* o, void* v);
 	static void	cb_clear_canvas(Fl_Menu_* o, void* v);
 
     static void cb_exchange_content(Fl_Menu_* o, void* v);
+    static void	cb_disolve(Fl_Menu_* o, void* v);
 
 	static void	cb_exit(Fl_Menu_* o, void* v);
 	static void	cb_about(Fl_Menu_* o, void* v);
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
+    static void cbDisplayChoice(Fl_Menu_* o, void* v);
     static void	cb_strokeDirectionChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
