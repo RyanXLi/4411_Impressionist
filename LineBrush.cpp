@@ -69,7 +69,10 @@ void LineBrush::BrushMove(const Point source, const Point target) {
     else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT || pDoc->m_pCurrentStrokeDirection == DIRECTION_OTHER_GRADIENT) {
 
         bool useGetOtherPixel = pDoc->m_pCurrentStrokeDirection == DIRECTION_OTHER_GRADIENT;
-
+        if (useGetOtherPixel && !GetDocument()->otherImageLoaded){
+        	glPopMatrix();
+        	return;
+        }
         // apply matrix: gaussianBlur
         std::vector<std::vector<int>> gaussianBlur = { 
             {1, 2, 1}, 

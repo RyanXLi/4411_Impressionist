@@ -325,7 +325,6 @@ void ImpressionistUI::cb_strokeDirectionChoice(Fl_Widget* o, void* v) {
     ImpressionistDoc* pDoc = pUI->getDocument();
 
     int type = (int)v;
-
     pDoc->setStrokeDirection(type);
 }
 

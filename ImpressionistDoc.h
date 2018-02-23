@@ -92,7 +92,7 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
-    unsigned char*  m_ucOtherBitmap;
+    unsigned char*  m_ucOtherBitmap=NULL;
     unsigned char*  m_ucEdgeBitmap;
 
     bool mainImageLoaded = false;
