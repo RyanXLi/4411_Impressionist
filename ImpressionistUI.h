@@ -44,15 +44,14 @@ public:
     Fl_Slider*          m_LineAngleSlider;
     Fl_Slider*          m_AlphaSlider;
     Fl_Slider*          m_SpacingSlider;
-
     Fl_Slider*          m_RedSlider;
     Fl_Slider*          m_GreenSlider;
     Fl_Slider*          m_BlueSlider;
 
     Fl_Light_Button*    sizeRandLightButton;
-
-
+    Fl_Button*          autoDrawButton;
 	Fl_Button*          m_ClearCanvasButton;
+    Fl_Choice *         filterChoice;
 
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
@@ -121,21 +120,26 @@ private:
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
     static Fl_Menu_Item		strokeDirectionMenu[NUM_STROKE_DIRECTION_TYPE + 1];
+    static Fl_Menu_Item     filterChoiceMenu[2 + 1];
 
 	static ImpressionistUI*	whoami(Fl_Menu_* o);
 
 	// All callbacks here.  Callbacks are declared 
 	// static
 	static void	cb_load_image(Fl_Menu_* o, void* v);
+    static void cb_load_other_image(Fl_Menu_* o, void* v);
+    static void cb_load_edge_image(Fl_Menu_* o, void* v);
 	static void	cb_save_image(Fl_Menu_* o, void* v);
 	static void	cb_brushes(Fl_Menu_* o, void* v);
 	static void	cb_clear_canvas(Fl_Menu_* o, void* v);
 
     static void cb_exchange_content(Fl_Menu_* o, void* v);
+    static void	cb_disolve(Fl_Menu_* o, void* v);
 
 	static void	cb_exit(Fl_Menu_* o, void* v);
 	static void	cb_about(Fl_Menu_* o, void* v);
 	static void	cb_brushChoice(Fl_Widget* o, void* v);
+    static void cbDisplayChoice(Fl_Menu_* o, void* v);
     static void	cb_strokeDirectionChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
@@ -152,6 +156,7 @@ private:
     static void	cb_spacingSlides(Fl_Widget* o, void* v);
     static void cb_sizeRandLightButton(Fl_Widget* o, void* v);
     static void cb_autoDrawButton(Fl_Widget* o, void* v);
+    static void cb_filterChoice(Fl_Widget* o, void* v);
 
 };
 

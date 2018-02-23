@@ -11,6 +11,13 @@
 #include "bitmap.h"
 #include <vector>
 
+
+enum {
+    DISPLAY_MAIN = 0,
+    DISPLAY_OTHER,
+    DISPLAY_EDGE
+};
+
 class ImpressionistUI;
 
 class ImpressionistDoc 
@@ -48,16 +55,29 @@ public:
 
     //void autoDraw(int spacing, bool sizeRand, bool orderRand);
 
-    int applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
+    int applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum, bool useGetOtherPixel);
     int applyMatrixToMatrix(std::vector<std::vector<int>> originalMatrix, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum);
 
-    GLuint intensity(Point point) {
-        GLubyte red = (GetOriginalPixel(point))[0];
-        GLubyte green = (GetOriginalPixel(point))[1];
-        GLubyte blue = (GetOriginalPixel(point))[2];
-        return 0.299 * red + 0.587 * green + 0.114 * blue;
+    void disolve();
+
+    GLuint intensity(Point point, bool useGetOtherPixel) {
+
+        if (useGetOtherPixel) {
+            GLubyte red = (GetOtherPixel(point.x, point.y))[0];
+            GLubyte green = (GetOtherPixel(point.x, point.y))[1];
+            GLubyte blue = (GetOtherPixel(point.x, point.y))[2];
+            return 0.299 * red + 0.587 * green + 0.114 * blue;
+        }
+        else {
+            GLubyte red = (GetOriginalPixel(point))[0];
+            GLubyte green = (GetOriginalPixel(point))[1];
+            GLubyte blue = (GetOriginalPixel(point))[2];
+            return 0.299 * red + 0.587 * green + 0.114 * blue;
+        }
     }
 
+    int loadAnotherImage(char *iname);
+    int loadEdgeImage(char *iname);
 
 
 
@@ -72,6 +92,12 @@ public:
 	// Bitmaps for original image and painting.
 	unsigned char*	m_ucBitmap;
 	unsigned char*	m_ucPainting;
+    unsigned char*  m_ucOtherBitmap;
+    unsigned char*  m_ucEdgeBitmap;
+
+    bool mainImageLoaded = false;
+    bool otherImageLoaded = false;
+    bool edgeImageLoaded = false;
 
 
 	// The current active brush.
@@ -85,11 +111,26 @@ public:
 
     bool hasDrawn;
 
+    std::vector<std::vector<int>> matrices[2] = {
+        { {1, 2, 1},
+          {2, 4, 2},
+          {1, 2, 1}
+        }, // gaussian blur
+
+        { {0, -1, 0},
+          {-1, 5, -1},
+          {0, -1, 0}
+        } // sharpening
+    };
+
+    std::vector<std::vector<int>> curMatrix = matrices[FILTER_GAUSSIAN_BLUR];
+
 
 // Operations
 public:
 	// Get the color of the original picture at the specified coord
 	GLubyte* GetOriginalPixel( int x, int y );   
+    GLubyte* GetOtherPixel(int x, int y);
 	// Get the color of the original picture at the specified point	
 	GLubyte* GetOriginalPixel( const Point p );  
 

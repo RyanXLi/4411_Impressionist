@@ -16,12 +16,14 @@ extern int NUM_OF_TRIANGLE;
 FilterBrush::FilterBrush(ImpressionistDoc* pDoc, char* name) :
     ImpBrush(pDoc, name) {
 
-    setMatrix({ {1,1,1}, {1,1,1}, {1,1,1} }, 3);
 }
 
 void FilterBrush::BrushBegin(const Point source, const Point target) {
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
+
+    std::vector<std::vector<int>> matrix = pDoc->curMatrix;
+    int matrixDim = matrix.size();
 
     if (matrixDim == 0) { return; }
 
@@ -36,6 +38,9 @@ void FilterBrush::BrushBegin(const Point source, const Point target) {
 void FilterBrush::BrushMove(const Point source, const Point target) {
     ImpressionistDoc* pDoc = GetDocument();
     ImpressionistUI* dlg = pDoc->m_pUI;
+
+    std::vector<std::vector<int>> matrix = pDoc->curMatrix;
+    int matrixDim = matrix.size();
 
     if (matrixDim == 0) { return; }
 

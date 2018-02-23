@@ -66,7 +66,10 @@ void LineBrush::BrushMove(const Point source, const Point target) {
             lastCoor.y = source.y;
         }
     }
-    else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT) {
+    else if (pDoc->m_pCurrentStrokeDirection == DIRECTION_GRADIENT || pDoc->m_pCurrentStrokeDirection == DIRECTION_OTHER_GRADIENT) {
+
+        bool useGetOtherPixel = pDoc->m_pCurrentStrokeDirection == DIRECTION_OTHER_GRADIENT;
+
         // apply matrix: gaussianBlur
         std::vector<std::vector<int>> gaussianBlur = { 
             {1, 2, 1}, 
@@ -74,17 +77,17 @@ void LineBrush::BrushMove(const Point source, const Point target) {
             {1, 2, 1} 
         };
         std::vector<std::vector<int>> blurred = { 
-            { pDoc->applyMatrix({ source.x - 1, source.y + 1 }, gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix({ source.x,     source.y + 1 }, gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix({ source.x + 1, source.y + 1 }, gaussianBlur, 3, TRUE) },
+            { pDoc->applyMatrix({ source.x - 1, source.y + 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix({ source.x,     source.y + 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix({ source.x + 1, source.y + 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel) },
 
-            { pDoc->applyMatrix({ source.x - 1, source.y}, gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix(source                   , gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix({ source.x + 1, source.y}, gaussianBlur, 3, TRUE) },
+            { pDoc->applyMatrix({ source.x - 1, source.y}, gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix(source                   , gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix({ source.x + 1, source.y}, gaussianBlur, 3, TRUE, useGetOtherPixel) },
 
-            { pDoc->applyMatrix({ source.x - 1, source.y - 1 }, gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix({ source.x    , source.y - 1 }, gaussianBlur, 3, TRUE),
-              pDoc->applyMatrix({ source.x + 1, source.y - 1 }, gaussianBlur, 3, TRUE) }
+            { pDoc->applyMatrix({ source.x - 1, source.y - 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix({ source.x    , source.y - 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel),
+              pDoc->applyMatrix({ source.x + 1, source.y - 1 }, gaussianBlur, 3, TRUE, useGetOtherPixel) }
         };
         // apply matrix: sobelX, sobelY
         std::vector<std::vector<int>> sobelX = {
@@ -105,6 +108,7 @@ void LineBrush::BrushMove(const Point source, const Point target) {
 
         pDoc->m_pUI->setLineAngle(atan2(sobelYresult, sobelXresult) * 180 / M_PI + 90);
     }
+    
 
 
     glRotatef(pDoc->getLineAngle(), 0.0, 0.0, 1.0);

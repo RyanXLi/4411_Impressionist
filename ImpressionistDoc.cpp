@@ -206,7 +206,7 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 
 
 
-int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum, bool useGetOtherPixel) {
     // suppose input valid
     int weightSum = 0;
 
@@ -227,31 +227,31 @@ int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> ma
             int x = source.x + j - (matrixDim - 1) / 2;
 
             if (x < 0 && y < 0) {
-                pxColor = intensity(Point(0, 0));
+                pxColor = intensity(Point(0, 0), useGetOtherPixel);
             }
             else if (x < 0 && y >= m_screenHeight) {
-                pxColor = intensity(Point(0, m_screenHeight - 1));
+                pxColor = intensity(Point(0, m_screenHeight - 1), useGetOtherPixel);
             }
             else if (x >= m_screenWidth && y < 0) {
-                pxColor = intensity(Point(m_screenWidth - 1, 0));
+                pxColor = intensity(Point(m_screenWidth - 1, 0), useGetOtherPixel);
             }
             else if (x >= m_screenWidth && y >= m_screenHeight) {
-                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1));
+                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1), useGetOtherPixel);
             }
             else if (x < 0) {
-                pxColor = intensity(Point(0, y));
+                pxColor = intensity(Point(0, y), useGetOtherPixel);
             }
             else if (x >= m_screenWidth) {
-                pxColor = intensity(Point(m_screenWidth - 1, y));
+                pxColor = intensity(Point(m_screenWidth - 1, y), useGetOtherPixel);
             }
             else if (y < 0) {
-                pxColor = intensity(Point(x, 0));
+                pxColor = intensity(Point(x, 0), useGetOtherPixel);
             }
             else if (y >= m_screenHeight) {
-                pxColor = intensity(Point(x, m_screenHeight - 1));
+                pxColor = intensity(Point(x, m_screenHeight - 1), useGetOtherPixel);
             }
             else {
-                pxColor = intensity(Point(x, y));
+                pxColor = intensity(Point(x, y), useGetOtherPixel);
             }
 
             finalColor += pxColor * matrix[i][j];
@@ -308,7 +308,6 @@ void ImpressionistDoc::setBrushType(int type)
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[type];
 
 
-
     switch (type) {
 
         case BRUSH_POINTS:
@@ -331,7 +330,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_CIRCLES:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -342,10 +341,10 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_STARS:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
-            //m_pUI->setLineWidth(1);
+            m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
@@ -353,10 +352,10 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_COILS:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
-            //m_pUI->setLineWidth(1);
+            m_pUI->setLineWidth(1);
             m_pUI->m_LineWidthSlider->deactivate();
             m_pUI->setLineAngle(0);
             m_pUI->m_LineAngleSlider->deactivate();
@@ -364,7 +363,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_SCATTERED_POINTS:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -383,7 +382,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_SCATTERED_CIRCLES:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -394,7 +393,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_FILTER:
-            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->setSize(1);
             m_pUI->m_BrushSizeSlider->deactivate();
@@ -484,14 +483,91 @@ int ImpressionistDoc::loadImage(char *iname)
 
 	// display it on origView
 	m_pUI->m_origView->resizeWindow(width, height);	
+    m_pUI->m_origView->displayImage = DISPLAY_MAIN;
 	m_pUI->m_origView->refresh();
 
 	// refresh paint view as well
 	m_pUI->m_paintView->resizeWindow(width, height);	
 	m_pUI->m_paintView->refresh();
 
+    mainImageLoaded = TRUE;
 
 	return 1;
+}
+
+
+int ImpressionistDoc::loadAnotherImage(char *iname) {
+
+    // try to open the image to read
+    unsigned char*	data;
+    int				width,
+        height;
+
+    if ((data = readBMP(iname, width, height)) == NULL) {
+        fl_alert("Can't load bitmap file");
+        return 0;
+    }
+
+    // reflect the fact of loading the new image
+    if (m_nWidth != width || m_nHeight != height) {
+        fl_alert("Different image dimension");
+        return 0;
+    }
+
+
+    //// release old storage
+    //if (m_ucBitmap) delete[] m_ucBitmap;
+    //if (m_ucPainting) delete[] m_ucPainting;
+
+    m_ucOtherBitmap = data;
+
+    // allocate space for draw view
+    //m_ucPainting = new unsigned char[width*height * 3];
+    //memset(m_ucPainting, 0, width*height * 3);
+    //
+    //m_pUI->m_mainWindow->resize(m_pUI->m_mainWindow->x(),
+    //    m_pUI->m_mainWindow->y(),
+    //    width * 2,
+    //    height + 25);
+
+    // display it on origView
+    m_pUI->m_origView->displayImage = DISPLAY_OTHER;
+    m_pUI->m_origView->refresh();
+
+    otherImageLoaded = true;
+
+    return 1;
+}
+
+
+int ImpressionistDoc::loadEdgeImage(char *iname) {
+
+    // try to open the image to read
+    unsigned char*	data;
+    int				width,
+        height;
+
+    if ((data = readBMP(iname, width, height)) == NULL) {
+        fl_alert("Can't load bitmap file");
+        return 0;
+    }
+
+    // reflect the fact of loading the new image
+    if (m_nWidth != width || m_nHeight != height) {
+        fl_alert("Different image dimension");
+        return 0;
+    }
+
+    m_ucEdgeBitmap = data;
+
+
+    // display it on origView
+    m_pUI->m_origView->displayImage = DISPLAY_EDGE;
+    m_pUI->m_origView->refresh();
+
+    edgeImageLoaded = true;
+
+    return 1;
 }
 
 
@@ -551,13 +627,58 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
     if (m_pUI->m_paintView->needToExchange) {
         targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
     }
-    else {
+
+    else if (m_pUI->m_origView->displayImage == DISPLAY_OTHER) {
+        targetPixel = (GLubyte*)(m_ucOtherBitmap + 3 * (y*m_nWidth + x));
+    }
+    else //DISPLAY_MAIN or EDGE
+    {
         targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
     }
+
+
     GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
         (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
         (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
     return processedPixel;
+
+}
+
+
+GLubyte* ImpressionistDoc::GetOtherPixel(int x, int y) {
+    if (x < 0)
+        x = 0;
+    else if (x >= m_nWidth)
+        x = m_nWidth - 1;
+
+    if (y < 0)
+        y = 0;
+    else if (y >= m_nHeight)
+        y = m_nHeight - 1;
+
+    GLubyte* targetPixel;
+
+    if (m_pUI->m_origView->displayImage == DISPLAY_OTHER) {
+        if (m_pUI->m_paintView->needToExchange) {
+            targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
+        }
+        else {
+            targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+        }
+        
+    }
+    else 
+    {
+        targetPixel = (GLubyte*)(m_ucOtherBitmap + 3 * (y*m_nWidth + x));
+    }
+
+
+    //GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
+    //    (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
+    //    (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
+    //return processedPixel;
+
+    return targetPixel;
 }
 
 //----------------------------------------------------------------
@@ -566,5 +687,24 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
 GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
 {
 	return GetOriginalPixel( p.x, p.y );
+}
+
+
+void ImpressionistDoc::disolve() {
+    //disolve main and the other image
+    if (!mainImageLoaded) {
+        fl_alert("Main image not loaded");
+        return;
+    }
+    if (!otherImageLoaded) {
+        fl_alert("Other image not loaded");
+        return;
+    }
+
+    for (int i = 0; i < 3 * m_nPaintWidth*m_nPaintHeight; i++) {
+        *(m_ucPainting + i) = *(m_ucBitmap + i) * 0.5 + *(m_ucOtherBitmap + i) * 0.5;
+    }
+
+    m_pUI->m_paintView->redraw();
 }
 
