@@ -93,8 +93,6 @@ void ImpressionistDoc::handleRightMouseDown(Point target) {
     //}
 
     // cache framebuffer
-
-    // cache framebuffer
     glReadBuffer(GL_FRONT);
 
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -132,9 +130,6 @@ void ImpressionistDoc::handleRightMouseDown(Point target) {
 void ImpressionistDoc::handleRightMouseDrag(Point target) {
 
     if (m_pCurrentStrokeDirection != DIRECTION_SLIDER_OR_RMOUSE) { return; }
-
-    // clear current framebuffer
-    // restore saved framebuffer
 
     // clear current framebuffer
     // restore saved framebuffer
@@ -192,7 +187,7 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 
     rightMouseEndPoint = new Point(target.x, target.y);
 
-    // TODO: calculate line angle
+    // calculate line angle
     Point* upperPoint = rightMouseEndPoint->y > rightMouseStartPoint->y ? 
         rightMouseEndPoint : rightMouseStartPoint;
 
@@ -203,49 +198,6 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
         (int)(atan2(upperPoint->y - lowerPoint->y, upperPoint->x - lowerPoint->x) * 180 / M_PI));
 }
 
-
-//void ImpressionistDoc::autoDraw(int spacing, bool sizeRand, bool orderRand) {
-//    // 1 <= spacing <= 16, half inclusive
-//
-//    std::random_device device;
-//    std::mt19937 mt(device());
-//    
-//    // use spacing to calc all required points
-//    // knuth shuffle all required points
-//
-//    int numRequiredPoints = (m_screenWidth / spacing + 1) * (m_screenHeight / spacing + 1);
-//    int numPointsOnCol = (m_screenHeight / spacing + 1);
-//    //int* points = new int[numRequiredPoints];
-//    //for (int i = 0; i < numRequiredPoints; i++) {
-//    //    points[i] = spacing * i;
-//    //}
-//    //
-//    //if (orderRand) { knuthShuffle(points, numRequiredPoints); }
-//
-//    for (int i = 0; i < numRequiredPoints; i++) {
-//        
-//        //Point* point = new Point(1 + points[i] / (m_screenWidth / spacing + 1) * 2,
-//        //    1 + points[i] % (m_screenWidth / spacing + 1));
-//
-//        
-//        Point* point = new Point(i / numPointsOnCol * spacing, i % numPointsOnCol * spacing);
-//
-//        if (sizeRand) {
-//            std::uniform_int_distribution<> dis(max(1, getSize() - 2), getSize() + 2);
-//            int randomSize = dis(mt);
-//            m_pUI->setSize(randomSize);
-//        }
-//
-//        printf("Painting point (%d, %d).\n", point->x, point->y);
-//
-//        // possible problem
-//        m_pCurrentBrush->BrushBegin(*point, *point);
-//
-//        m_pUI->m_paintView->SaveCurrentContent();
-//        m_pUI->m_paintView->RestoreContent();
-//        
-//    }
-//}
 
 
 int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
@@ -328,9 +280,6 @@ int ImpressionistDoc::applyMatrixToMatrix(std::vector<std::vector<int>> original
         for (int j = 0; j < matrixDim; j++) {
             int y = i;
             int x = j;
-
-
-            
 
             finalColor += originalMatrix[x][y] * matrix[i][j];
         }
@@ -570,7 +519,17 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
 	else if ( y >= m_nHeight ) 
 		y = m_nHeight-1;
 
-	return (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+    GLubyte* targetPixel;
+    if (m_pUI->m_paintView->needToExchange) {
+        targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
+    }
+    else {
+        targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+    }
+    GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
+        (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
+        (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
+    return processedPixel;
 }
 
 //----------------------------------------------------------------

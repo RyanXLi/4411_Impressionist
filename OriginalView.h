@@ -29,7 +29,11 @@ public:
 	void refresh();
 
 	void resizeWindow(int width, int height);
-    //GLubyte* cacheForExchange();
+    
+    GLubyte* cacheForExchange();
+    void SaveCurrentContent();
+    void RestoreContent();
+
 
 	ImpressionistDoc*	m_pDoc;
 
@@ -38,6 +42,7 @@ public:
     bool needToExchange = FALSE;
 
     GLubyte* originalViewExchangeCache = nullptr;
+    GLubyte* contentCache = nullptr;
 
 
 private:

@@ -35,6 +35,7 @@ public:
 
 // for brush dialog
 	Fl_Window*			m_brushDialog;
+    Fl_Window*			m_colorDialog;
 	Fl_Choice*			m_BrushTypeChoice;
     Fl_Choice*			m_StrokeDirectionChoice;
 
@@ -43,6 +44,11 @@ public:
     Fl_Slider*          m_LineAngleSlider;
     Fl_Slider*          m_AlphaSlider;
     Fl_Slider*          m_SpacingSlider;
+
+    Fl_Slider*          m_RedSlider;
+    Fl_Slider*          m_GreenSlider;
+    Fl_Slider*          m_BlueSlider;
+
     Fl_Light_Button*    sizeRandLightButton;
 
 
@@ -106,6 +112,11 @@ private:
     int     m_spacing;
     bool    m_sizeRand;
 
+public:
+    double  m_red, m_green, m_blue; // modifiers from 0 to 2
+
+private:
+
 	// Static class members
 	static Fl_Menu_Item		menuitems[];
 	static Fl_Menu_Item		brushTypeMenu[NUM_BRUSH_TYPE+1];
@@ -120,7 +131,7 @@ private:
 	static void	cb_brushes(Fl_Menu_* o, void* v);
 	static void	cb_clear_canvas(Fl_Menu_* o, void* v);
 
-    static void cb_exchange_contents(Fl_Menu_* o, void* v);
+    static void cb_exchange_content(Fl_Menu_* o, void* v);
 
 	static void	cb_exit(Fl_Menu_* o, void* v);
 	static void	cb_about(Fl_Menu_* o, void* v);
@@ -128,6 +139,12 @@ private:
     static void	cb_strokeDirectionChoice(Fl_Widget* o, void* v);
 	static void	cb_clear_canvas_button(Fl_Widget* o, void* v);
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
+
+    static void	cb_color_dialog(Fl_Menu_* o, void* v);
+
+    static void cb_redSlides(Fl_Widget* o, void* v);
+    static void cb_greenSlides(Fl_Widget* o, void* v);
+    static void cb_blueSlides(Fl_Widget* o, void* v);
 
     static void	cb_lineWidthSlides(Fl_Widget* o, void* v);
     static void	cb_lineAngleSlides(Fl_Widget* o, void* v);
