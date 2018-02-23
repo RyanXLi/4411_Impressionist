@@ -145,6 +145,7 @@ private:
 	static void	cb_sizeSlides(Fl_Widget* o, void* v);
 
     static void	cb_color_dialog(Fl_Menu_* o, void* v);
+    static void	cb_undo(Fl_Menu_* o, void* v);
 
     static void cb_redSlides(Fl_Widget* o, void* v);
     static void cb_greenSlides(Fl_Widget* o, void* v);

@@ -48,11 +48,13 @@ public:
 
     GLubyte* paintViewExchangeCache = nullptr;
     bool needToExchange = FALSE;
+    bool needToUndo = FALSE;
 
 
 //private: // TODO: change back
 	GLvoid* m_pPaintBitstart;
     GLvoid* m_pBitmapBitstart;
+    GLvoid* m_pPaintBackupBitstart=NULL;
 	int		m_nDrawWidth,
 			m_nDrawHeight,
 			m_nStartRow, 

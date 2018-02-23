@@ -118,7 +118,7 @@ void PaintView::draw()
         //printf("target: (%d, %d)\n\n", target.x, target.y);
 
         
-		
+		printf("%i\n",eventToDo);
 		// This is the event handler
 		switch (eventToDo) 
 		{
@@ -268,8 +268,11 @@ void PaintView::SaveCurrentContent()
 
 	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
 	glPixelStorei( GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth );
-	
+
     if (needToExchange) {
+    	if(m_pBitmapBitstart)
+    		m_pPaintBackupBitstart=new unsigned char[3*m_nDrawWidth*m_nDrawHeight];
+    		memcpy(m_pPaintBackupBitstart,m_pBitmapBitstart,3*m_nDrawWidth*m_nDrawHeight);
         glReadPixels(0,
             m_nWindowHeight - m_nDrawHeight,
             m_nDrawWidth,
@@ -279,6 +282,9 @@ void PaintView::SaveCurrentContent()
             m_pBitmapBitstart);
     }
     else {
+    	if (m_pPaintBitstart)
+    		m_pPaintBackupBitstart=new unsigned char[3*m_nDrawWidth*m_nDrawHeight];
+    		memcpy(m_pPaintBackupBitstart,m_pPaintBitstart,3*m_nDrawWidth*m_nDrawHeight);
         glReadPixels(0,
             m_nWindowHeight - m_nDrawHeight,
             m_nDrawWidth,
@@ -299,6 +305,36 @@ void PaintView::RestoreContent()
 	glRasterPos2i( 0, m_nWindowHeight - m_nDrawHeight );
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 	glPixelStorei( GL_UNPACK_ROW_LENGTH, m_pDoc->m_nPaintWidth );
+	if (needToUndo){
+		if(!m_pPaintBackupBitstart){
+			needToUndo=false;
+	        glDrawPixels(m_nDrawWidth,
+	            m_nDrawHeight,
+	            GL_RGB,
+	            GL_UNSIGNED_BYTE,
+	            m_pPaintBitstart);
+			return;
+		}
+        glDrawPixels(m_nDrawWidth,
+            m_nDrawHeight,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            m_pPaintBackupBitstart);
+        if(needToExchange){
+        	memcpy(m_pBitmapBitstart,
+        			m_pPaintBackupBitstart,
+        			3*m_nDrawWidth*m_nDrawHeight);
+        }
+        else{
+        	memcpy(m_pPaintBitstart,
+        			m_pPaintBackupBitstart,
+        			3*m_nDrawWidth*m_nDrawHeight);
+        }
+        needToUndo=false;
+        delete m_pPaintBackupBitstart;
+        m_pPaintBackupBitstart=NULL;
+        return;
+	}
     if (needToExchange) {
         glDrawPixels(m_nDrawWidth,
             m_nDrawHeight,

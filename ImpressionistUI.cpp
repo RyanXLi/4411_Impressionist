@@ -233,6 +233,11 @@ void ImpressionistUI::cb_color_dialog(Fl_Menu_* o, void* v) {
     whoami(o)->m_colorDialog->show();
 }
 
+void ImpressionistUI::cb_undo(Fl_Menu_* o, void* v){
+	whoami(o)->m_paintView->needToUndo=true;
+	whoami(o)->m_paintView->redraw();
+}
+
 //------------------------------------------------------------
 // Clears the paintview canvas.
 // Called by the UI when the clear canvas menu item is chosen
@@ -506,6 +511,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
     { "&Function",		0, 0, 0, FL_SUBMENU },
+    	{ "&Undo",        FL_ALT + 'u', (Fl_Callback *)ImpressionistUI::cb_undo },
         { "&Colors",        FL_ALT + 'o', (Fl_Callback *)ImpressionistUI::cb_color_dialog },
         { "&Exchange contents", FL_ALT + 'e', (Fl_Callback *)ImpressionistUI::cb_exchange_content},
         { "&Disolve",        FL_ALT + 'i', (Fl_Callback *)ImpressionistUI::cb_disolve },
