@@ -436,6 +436,14 @@ void ImpressionistUI::cb_autoDrawButton(Fl_Widget* o, void* v) {
     pUI->m_paintView->redraw();
 }
 
+void ImpressionistUI::cb_filterChoice(Fl_Widget* o, void* v) {
+    ImpressionistUI* pUI = ((ImpressionistUI *)(o->user_data()));
+    ImpressionistDoc* pDoc = pUI->getDocument();
+
+    int filterChoice = (int)v;
+    pDoc->curMatrix = pDoc->matrices[filterChoice];
+}
+
 
 
 
@@ -483,6 +491,14 @@ Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[NUM_STROKE_DIRECTION_TYPE + 1]
     { "Slider/Right Mouse",		FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_SLIDER_OR_RMOUSE },
     { "Gradient",				FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_GRADIENT },
     { "Brush Direction",			FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_BRUSH_DIRECTION },
+    { 0 }
+};
+
+
+
+Fl_Menu_Item ImpressionistUI::filterChoiceMenu[2 + 1] = {
+    { "Gaussian Blur",FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_filterChoice, (void *)FILTER_GAUSSIAN_BLUR },
+    { "Sharpening",FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_filterChoice, (void *)FILTER_SHARPENING },
     { 0 }
 };
 
@@ -623,9 +639,15 @@ ImpressionistUI::ImpressionistUI() {
         sizeRandLightButton->user_data((void*)(this));   // record self to be used by static callback functions
         sizeRandLightButton->callback(cb_sizeRandLightButton);
 
-        Fl_Button* autoDrawButton = new Fl_Button(320, 240, 50, 20, "&Draw");
+        autoDrawButton = new Fl_Button(320, 240, 50, 20, "&Draw");
         autoDrawButton->user_data((void*)(this));   // record self to be used by static callback functions
         autoDrawButton->callback(cb_autoDrawButton);
+
+        filterChoice = new Fl_Choice(50, 280, 150, 25, "filter");
+        filterChoice->user_data((void*)(this));	 // record self to be used by static callback functions
+
+        filterChoice->menu(filterChoiceMenu);
+        filterChoice->callback(cb_filterChoice);
 
 
     m_brushDialog->end();	

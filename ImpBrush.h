@@ -23,6 +23,13 @@ enum
 };
 
 
+enum {
+    FILTER_GAUSSIAN_BLUR = 0,
+    FILTER_SHARPENING,
+    NUM_FILTER_TYPE
+};
+
+
 
 // Each stroke direction type has an associated constant.
 enum {

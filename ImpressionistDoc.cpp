@@ -302,7 +302,6 @@ void ImpressionistDoc::setBrushType(int type)
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[type];
 
 
-
     switch (type) {
 
         case BRUSH_POINTS:

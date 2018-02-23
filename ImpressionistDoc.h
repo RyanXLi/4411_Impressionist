@@ -85,6 +85,20 @@ public:
 
     bool hasDrawn;
 
+    std::vector<std::vector<int>> matrices[2] = {
+        { {1, 2, 1},
+          {2, 4, 2},
+          {1, 2, 1}
+        }, // gaussian blur
+
+        { {0, -1, 0},
+          {-1, 5, -1},
+          {0, -1, 0}
+        } // sharpening
+    };
+
+    std::vector<std::vector<int>> curMatrix = matrices[FILTER_GAUSSIAN_BLUR];
+
 
 // Operations
 public:
