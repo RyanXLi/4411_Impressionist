@@ -540,7 +540,8 @@ Fl_Menu_Item ImpressionistUI::brushTypeMenu[NUM_BRUSH_TYPE+1] = {
 Fl_Menu_Item ImpressionistUI::strokeDirectionMenu[NUM_STROKE_DIRECTION_TYPE + 1] = {
     { "Slider/Right Mouse",		FL_ALT + 's', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_SLIDER_OR_RMOUSE },
     { "Gradient",				FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_GRADIENT },
-    { "Brush Direction",			FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_BRUSH_DIRECTION },
+    { "Other Gradient",			FL_ALT + 'g', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_OTHER_GRADIENT },
+    { "Brush Direction",		FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_strokeDirectionChoice, (void *)DIRECTION_BRUSH_DIRECTION },
     { 0 }
 };
 

@@ -200,7 +200,7 @@ void ImpressionistDoc::handleRightMouseUp(Point target) {
 
 
 
-int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum) {
+int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> matrix, int matrixDim, bool useWeightSum, bool useGetOtherPixel) {
     // suppose input valid
     int weightSum = 0;
 
@@ -221,31 +221,31 @@ int ImpressionistDoc::applyMatrix(Point source, std::vector<std::vector<int>> ma
             int x = source.x + j - (matrixDim - 1) / 2;
 
             if (x < 0 && y < 0) {
-                pxColor = intensity(Point(0, 0));
+                pxColor = intensity(Point(0, 0), useGetOtherPixel);
             }
             else if (x < 0 && y >= m_screenHeight) {
-                pxColor = intensity(Point(0, m_screenHeight - 1));
+                pxColor = intensity(Point(0, m_screenHeight - 1), useGetOtherPixel);
             }
             else if (x >= m_screenWidth && y < 0) {
-                pxColor = intensity(Point(m_screenWidth - 1, 0));
+                pxColor = intensity(Point(m_screenWidth - 1, 0), useGetOtherPixel);
             }
             else if (x >= m_screenWidth && y >= m_screenHeight) {
-                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1));
+                pxColor = intensity(Point(m_screenWidth - 1, m_screenHeight - 1), useGetOtherPixel);
             }
             else if (x < 0) {
-                pxColor = intensity(Point(0, y));
+                pxColor = intensity(Point(0, y), useGetOtherPixel);
             }
             else if (x >= m_screenWidth) {
-                pxColor = intensity(Point(m_screenWidth - 1, y));
+                pxColor = intensity(Point(m_screenWidth - 1, y), useGetOtherPixel);
             }
             else if (y < 0) {
-                pxColor = intensity(Point(x, 0));
+                pxColor = intensity(Point(x, 0), useGetOtherPixel);
             }
             else if (y >= m_screenHeight) {
-                pxColor = intensity(Point(x, m_screenHeight - 1));
+                pxColor = intensity(Point(x, m_screenHeight - 1), useGetOtherPixel);
             }
             else {
-                pxColor = intensity(Point(x, y));
+                pxColor = intensity(Point(x, y), useGetOtherPixel);
             }
 
             finalColor += pxColor * matrix[i][j];
@@ -612,6 +612,43 @@ GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
         (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
         (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
     return processedPixel;
+}
+
+
+GLubyte* ImpressionistDoc::GetOtherPixel(int x, int y) {
+    if (x < 0)
+        x = 0;
+    else if (x >= m_nWidth)
+        x = m_nWidth - 1;
+
+    if (y < 0)
+        y = 0;
+    else if (y >= m_nHeight)
+        y = m_nHeight - 1;
+
+    GLubyte* targetPixel;
+
+    if (m_pUI->m_origView->displayImage == DISPLAY_OTHER) {
+        if (m_pUI->m_paintView->needToExchange) {
+            targetPixel = (GLubyte*)(m_ucPainting + 3 * (y*m_nWidth + x));
+        }
+        else {
+            targetPixel = (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+        }
+        
+    }
+    else 
+    {
+        targetPixel = (GLubyte*)(m_ucOtherBitmap + 3 * (y*m_nWidth + x));
+    }
+
+
+    //GLubyte* processedPixel = new GLubyte[3]{ (GLubyte)min((targetPixel[0] * m_pUI->m_red), 255),
+    //    (GLubyte)min((targetPixel[1] * m_pUI->m_green), 255),
+    //    (GLubyte)min((targetPixel[2] * m_pUI->m_blue), 255) };
+    //return processedPixel;
+
+    return targetPixel;
 }
 
 //----------------------------------------------------------------
