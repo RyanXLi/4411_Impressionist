@@ -19,6 +19,8 @@
 #include "PointBrush.h"
 #include "LineBrush.h"
 #include "CircleBrush.h"
+#include "StarBrush.h"
+#include "CoilBrush.h"
 #include "ScatteredPointBrush.h"
 #include "ScatteredLineBrush.h"
 #include "ScatteredCircleBrush.h"
@@ -50,6 +52,10 @@ ImpressionistDoc::ImpressionistDoc()
 		= new LineBrush( this, "Lines" );
 	ImpBrush::c_pBrushes[BRUSH_CIRCLES]				
 		= new CircleBrush( this, "Circles" );
+	ImpBrush::c_pBrushes[BRUSH_STARS]
+		= new StarBrush( this, "Stars" );
+	ImpBrush::c_pBrushes[BRUSH_COILS]
+		= new CoilBrush( this, "Coils" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_POINTS]	
 		= new ScatteredPointBrush( this, "Scattered Points" );
 	ImpBrush::c_pBrushes[BRUSH_SCATTERED_LINES]		
@@ -325,7 +331,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_CIRCLES:
-            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -335,8 +341,30 @@ void ImpressionistDoc::setBrushType(int type)
             m_pUI->m_AlphaSlider->activate();
             break;
 
+        case BRUSH_STARS:
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
+            //m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
+            break;
+
+        case BRUSH_COILS:
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            m_pUI->m_StrokeDirectionChoice->deactivate();
+            m_pUI->m_BrushSizeSlider->activate();
+            //m_pUI->setLineWidth(1);
+            m_pUI->m_LineWidthSlider->deactivate();
+            m_pUI->setLineAngle(0);
+            m_pUI->m_LineAngleSlider->deactivate();
+            m_pUI->m_AlphaSlider->activate();
+            break;
+
         case BRUSH_SCATTERED_POINTS:
-            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -355,7 +383,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_SCATTERED_CIRCLES:
-            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->m_BrushSizeSlider->activate();
             m_pUI->setLineWidth(1);
@@ -366,7 +394,7 @@ void ImpressionistDoc::setBrushType(int type)
             break;
 
         case BRUSH_FILTER:
-            setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
+            //setStrokeDirection(DIRECTION_SLIDER_OR_RMOUSE);
             m_pUI->m_StrokeDirectionChoice->deactivate();
             m_pUI->setSize(1);
             m_pUI->m_BrushSizeSlider->deactivate();
